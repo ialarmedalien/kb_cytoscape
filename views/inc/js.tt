@@ -1,0 +1,128 @@
+[%
+
+# l - length changing input control
+# f - filtering input
+# t - The table!
+# i - Table information summary
+# p - pagination control
+# r - processing display element
+#
+# "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
+# "<'row'<'col-sm-12'tr>>" +
+# "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+#
+# B - Buttons
+# R - ColReorder
+# S - Scroller
+# P - SearchPanes
+
+  BLOCK default_table_conf %]
+
+    const tableConfig = {
+      dom: 'Bfrtipl',
+      buttons: [
+        {
+          extend: 'csv',
+          text: 'Download as CSV',
+        },
+      ],
+      lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+      columns: cols,
+    }
+[%
+  END;
+
+
+  BLOCK dsv_wrapper;
+  # requires:
+  # data_file : /path/to/data/file.txt
+  # data_file_format: csv | tsv
+%]
+    d3.text('[% data_file %]').then(function(lines) {
+      const data = d3.[% data_file_format %]Parse(lines)
+[%
+    content;
+%]
+    })
+[%
+  END;
+
+
+  BLOCK default_data_load;
+  #
+  # args:
+  #   data_file: '/path/to/file'        # path to file containing table data
+  #   data_file_format: ('csv' | 'tsv') # optional
+  #   table_id: 'some_table_id'         # ID of the table
+
+    IF data_file_format
+      && ( data_file_format == 'csv' || data_file_format == 'tsv' );
+
+      WRAPPER dsv_wrapper;
+%]
+      tableConfig.data = data
+      $('#[% table_id %]').DataTable(tableConfig);
+[%
+      END;
+
+    ELSIF data_file;
+      # retrieve the data file by AJAX
+%]
+      tableConfig.ajax = '[% data_file %]'
+      $('#[% table_id %]').DataTable(tableConfig)
+[%
+    ELSE;
+
+      # custom code to get data goes here
+%]
+      tableConfig.data = table_data
+      $('#[% table_id %]').DataTable(tableConfig)
+[%  END;
+
+  END;
+
+
+  BLOCK default_js; %]
+<script>
+  "use strict";
+  $(document).ready(function () {
+
+    const cols = [
+      { data: 'term_id',            title: 'Term ID' },
+      { data: 'term',               title: 'Description' },
+      { data: 'ontology',           title: 'Ontology' },
+      { data: 'num_in_feature_set', title: 'Number in FeatureSet' },
+      { data: 'num_in_ref_genome',  title: 'Number in Genome' },
+      { data: 'raw_p_value',        title: 'Raw p-value' },
+      { data: 'adjusted_p_value',   title: 'Corrected p-value' },
+    ]
+[%
+    # write out the default table config
+    default_table_conf;
+
+    # write out the data loading code
+    default_data_load;
+
+    IF data_file_format
+      && ( data_file_format == 'csv' || data_file_format == 'tsv' ); %]
+
+    d3.[% data_file_format %]('[% data_file %]').then(function(data) {
+[%
+      # put in any data wrangling here
+%]
+      tableConfig.data = data
+      $('#[% table_id %]').DataTable(tableConfig);
+    });
+[%
+    ELSIF data_file;
+      # retrieve the data file by AJAX
+%]
+      tableConfig.ajax = '[% data_file %]'
+      $('#[% table_id %]').DataTable(tableConfig)
+
+    ELSIF
+
+[%  END %]
+  })
+</script>
+[% END %]

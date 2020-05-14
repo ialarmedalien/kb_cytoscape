@@ -1,0 +1,455 @@
+[%	# labels macro
+	# generates a label from an object attribute/string
+
+	metadata_h = {
+
+		# filters, etc.
+		pro => { label => 'Prochlorococcus' },
+		syn => { label => 'Synechococcus' },
+		pro_phage => { label => 'Prochlorococcus phage' },
+		syn_phage => { label => 'Synechococcus phage' },
+		other => { label => 'Other bacteria' },
+		other_phage => { label => 'Other phage' },
+		phage => { label => 'Phages from Prochlorococcus, Synechococcus, and others' },
+		coccus => { label => 'Prochlorococcus and Synechococcus' },
+		bacteria => { label => 'Prochlorococcus, Synechococcus, and other bacteria' },
+#		isolate => { label => 'All ProPortal isolates' },
+#		metagenome => { label => 'Marine metagenomes' },
+		pp_isolate => { label => 'All ProPortal isolates' },
+		pp_metagenome => { label => 'Marine metagenomes' },
+		proportal => { label => 'All isolates and metagenomes' },
+		all_proportal => { label => 'All isolates and metagenomes' },
+
+		# category filter
+		protein_coding => { label => 'Protein-coding genes' },
+		with_function => { label => 'Genes with function assignment' },
+		without_function => { label => 'Genes without function assignment' },
+		fused => { label => 'Fused protein-coding genes' },
+		signalp => { label => 'Protein-coding genes encoding signal peptides' },
+		transmembrane => { label => 'Protein-coding genes encoding transmembrane proteins' },
+		rna  => { label => 'RNA' },
+		rrna => { label => 'rRNA' },
+		'5s_rrna'  => { label => '5S rRNA' },
+		'16s_rrna' => { label => '16S rRNA' },
+		'23s_rrna' => { label => '23S rRNA' },
+		trna => { label => 'tRNA' },
+		xrna => { label => 'Other RNA' },
+		pseudogene => { label => 'Pseudogene' },
+		cassette => { label => 'Genes in chromosomal cassettes' },
+		biosynthetic_cluster => { label => 'Genes in biosynthetic clusters' },
+
+		pp_subset => { label => 'ProPortal subset', macro => 'label_from_attr', render => [ 'render_getLabel', 'pp_subset' ] },
+
+		dataset_type => { macro => 'label_from_attr', render => [ 'render_getLabel', 'dataset_type' ] },
+
+
+
+# taxon / gold metadata
+# taxon / gold seq proj
+## gold_sequencing_project
+## Taxon
+
+# add_date GSP
+# add_date TAXON
+altitude => { unit => 'm', }, # GSP
+# analysis_product_name TAXON
+analysis_project_id => { label => 'Analysis project ID', ext_link => 'gold_base_url_analysis' }, # TAXON
+# analysis_project_type TAXON
+# ani_species TAXON
+bioproject_accession => { label => 'NCBI BioProject', ext_link => 'ncbi_bioproject', }, # GSP
+biosample_accession => { label => 'NCBI BioSample', ext_link => 'ncbi_biosample', }, # GSP
+# biotic_rel GSP
+# cell_shape GSP
+chlorophyll_concentration => { unit => '&mu;g/L' }, # GSP
+# clade GSP
+# combined_sample_flag TAXON
+# comments GSP
+# comments TAXON
+# contact_oid GSP
+# culture_type GSP
+# cultured GSP
+# date_collected GSP
+depth => { unit => 'm' }, # GSP
+# display_name GSP
+distmatrix_date => { label => 'Distance Matrix Calculation Date' }, # TAXON
+# domain GSP
+# domain TAXON
+# ecosystem GSP
+# ecosystem_category GSP
+# ecosystem_subtype GSP
+# ecosystem_type GSP
+# ecotype GSP
+# edit_flag TAXON
+# env_sample TAXON
+# family TAXON
+# funding_agency TAXON
+# funding_program GSP
+# gbk_project_id TAXON
+# genome_completion TAXON
+# genome_type TAXON
+# genus GSP
+# genus TAXON
+geo_location => { label => '<abbr title="National Oceanic and Atmospheric Administration">NOAA</abbr> sea name' }, # GSP
+gold_id => { label => 'Sequencing project ID', ext_link => 'gold_base_url_project', }, # GSP
+# gold_id TAXON
+# gpts_proposal_id GSP
+# gram_stain GSP
+# gram_stain TAXON
+# high_quality_flag TAXON
+# hmp_id GSP
+# host_gender GSP
+# host_name GSP
+# host_ncbi_taxid GSP
+# host_ncbi_taxon_id TAXON
+# img_ec_flag TAXON
+# img_product_flag TAXON
+# img_taxon_oid GSP
+img_version => { label => 'IMG release' }, # TAXON
+# in_file TAXON
+ir_class => { label => 'Class' }, # TAXON
+ir_order => { label => 'Order' }, # TAXON
+# is_big_euk TAXON
+# is_low_quality TAXON
+# is_nr TAXON
+# is_pangenome TAXON
+# is_proxygene_set TAXON
+is_public => { label => 'Public release' }, # TAXON
+# is_replaced TAXON
+# is_std_reference TAXON
+# iso_country GSP
+# isolation GSP
+# its_ap_id TAXON
+# its_proposal_id GSP
+# its_spid GSP
+# jgi_project_id TAXON
+# jgi_species_code TAXON
+# latitude GSP
+latlong => { label => 'Latitude, longitude' },
+# legacy_gold_id TAXON
+# legacy_project_type GSP
+# lock_date TAXON
+# locked_by TAXON
+# locus_tag GSP
+longhurst => { label => 'Longhurst province' },
+# longhurst_code GSP
+# longhurst_description GSP
+# longitude GSP
+mod_date => { label => 'Date modified' }, # GSP
+# mod_date TAXON
+# modified_by GSP
+# modified_by TAXON
+# motility GSP
+# mrn GSP
+
+ncbi_bioproject_id => { label => 'NCBI BioProject ID' }, # TAXON
+# ncbi_bioproject_id TAXON -- same as bioproject_accession GSP
+
+ncbi_class => { label => 'NCBI class' }, # GSP
+ncbi_family => { label => 'NCBI family' }, # GSP
+ncbi_genus => { label => 'NCBI genus' }, # GSP
+ncbi_kingdom => { label => 'NCBI kingdom' }, # GSP
+ncbi_order => { label => 'NCBI order' }, # GSP
+ncbi_phylum => { label => 'NCBI phylum' }, # GSP
+
+ncbi_project_id => { label => 'NCBI BioProject ID', ext_link => 'ncbi_bioproject' }, # GSP
+# ncbi_project_id TAXON
+ncbi_species => { label => 'NCBI species' }, # GSP
+# ncbi_species_code TAXON
+ncbi_taxon_id => { label => 'NCBI Taxon ID', ext_link => 'ncbi_taxon' }, # GSP
+# ncbi_taxon_id TAXON
+nitrate_concentration => { unit => '&mu;mol/kg' }, # GSP
+# obsolete_flag TAXON
+# ornl_species_code TAXON
+oxygen_concentration => { unit => '&mu;mol/kg' }, # GSP
+# oxygen_req GSP
+# ph GSP
+# phylodist_date TAXON
+# phylodist_method TAXON
+# phylogeny GSP
+# phylum TAXON
+# pi_email GSP
+# pi_name GSP
+# pm_email GSP
+# pm_name GSP
+# pmo_project_id GSP
+pressure => { unit => 'dbar' }, # GSP
+# project TAXON
+# project_id GSP
+# project_status GSP
+proport_isolation => { label => 'Isolation details' }, # GSP
+proport_ocean => { label => 'Ocean' }, # GSP
+# proport_station GSP
+proport_woa_dissolved_oxygen => { label => 'Dissolved oxygen', unit => 'ml/L' }, # GSP
+proport_woa_nitrate => { label => 'Nitrate', unit => '&mu;mol/L' }, # GSP
+proport_woa_phosphate => { label => 'Phosphate', unit => '&mu;mol/L' }, # GSP
+proport_woa_salinity => { label => 'Salinity', }, # GSP
+proport_woa_silicate => { label => 'Silicate', unit => '&mu;mol/L' }, # GSP
+proport_woa_temperature => { label => 'Temperature', unit => '&deg; C' }, # GSP
+# proposal_name TAXON
+refseq_project_id => { ext_link => '', label => 'RefSeq Project ID' }, # TAXON
+# release_date TAXON
+# replicate_num GSP
+# salinity GSP
+# salinity_concentration GSP
+# sample_body_site GSP
+# sample_body_subsite GSP
+# sample_collect_temp GSP
+# sample_gold_id TAXON
+# seq_center TAXON
+seq_quality => { label => 'Sequence quality' }, # GSP
+# seq_status GSP
+# seq_status TAXON
+# sequencing_depth GSP
+# sequencing_gold_id TAXON
+# sequencing_quality GSP
+# sequencing_strategy GSP
+# species GSP
+# species TAXON
+# specific_ecosystem GSP
+# sporulation GSP
+# strain GSP
+# strain TAXON
+study_gold_id => { label => 'Study project ID', ext_link => 'gold_base_url_study' }, # TAXON
+# submission_id TAXON
+taxon_display_name => { label => 'Taxon name', macro => 'taxon_name_link', render => [ 'render_details_link', 'taxon' ] }, # TAXON
+# taxon_name TAXON
+taxon_oid => { label => 'IMG taxon ID', macro => 'taxon_id_link' }, # TAXON
+# taxonomy_lock TAXON
+# visit_num GSP
+temperature => { unit => '&deg; C', },
+# type_strain GSP
+# uncultured_type GSP
+# viral_group GSP
+# viral_subgroup GSP
+# visit_num GSP
+
+
+		dna_seq_length => { label => 'Gene length', unit => '<abbr title="base pairs">bp</abbr>' },
+		aa_seq_length => { label => 'Gene product length', unit => '<abbr title="amino acids">aa</abbr>' },
+
+	# special
+		cbox => { label => '' },
+
+	# gene
+		gene_oid => {
+			label => 'IMG gene ID',
+			macro => 'gene_id_link'
+			render => [ 'render_details_link', 'gene' ],
+		},
+		gene_display_name => {
+			label => 'Gene name',
+			macro => 'gene_name_link',
+			render => [ 'render_details_link', 'gene' ],
+		},
+		coords   => { label => 'DNA coordinates' },
+		est_copy => { label => 'Estimated copy number' },
+		img_product_source => { label => 'IMG product source' },
+		img_orf_type => { label => 'IMG ORF type' },
+
+	# cycog_version
+		n_clusters => { label => 'Number of clusters' },
+		n_taxa => { label => 'Number of taxa' },
+
+	# scaffold
+		scaffold_oid => {
+			label => 'IMG scaffold ID',
+			macro => 'scaffold_id_link',
+			render => [ 'render_details_link', 'scaffold' ]
+		},
+		scaffold_name => {
+			label => 'Scaffold name',
+			macro => 'scaffold_name_link',
+			render => [ 'render_details_link', 'scaffold' ]
+		},
+		mol_topology => { label => 'Topology' },
+		scaffold_dbxref => {
+			label => 'External Ref',
+			macro => 'scaffold_dbxref'
+#			render =>
+#			scaffold_dbxref => sub {
+		}
+
+		# stats -- taxon specific
+		cds_genes => { label => 'Protein-coding genes' },
+		fused_genes => { label => 'Fused protein-coding genes' },
+		genes_in_biosynthetic => { label => 'Genes in biosynthetic clusters' },
+		genes_in_cassettes => { label => 'Genes in chromosomal cassettes' },
+		genes_signalp => { label => 'Protein-coding genes encoding signal peptides' },
+		genes_transmembrane => { label => 'Protein-coding genes encoding transmembrane proteins' },
+		genes_w_func_pred => { label => 'Genes with function assignment' },
+		other_rna_genes => { label => 'Other RNA' },
+		pseudo_genes => { label => 'Pseudogenes' },
+		rna_genes => { label => 'RNA' },
+		rrna_genes => { label => 'rRNA' },
+		rrna5s_genes => { label => '5S rRNA' },
+		rrna16s_genes => { label => '16S rRNA' },
+		rrna23s_genes => { label => '23S rRNA' },
+		total_biosynthetic => { label => 'Biosynthetic clusters' },
+		total_cassettes => { label => 'Chromosomal cassettes' },
+		total_gene_count => { label => 'Total genes' },
+		trna_genes => { label => 'tRNA' },
+		without_function => { label => 'Genes without function assignment' },
+
+		seq_length => { label => 'Sequence length' },
+		gc_percent => { label => '% GC content' },
+		count_total_gene => { label => 'Total gene count' },
+		count_rna => { label => 'RNA count' },
+
+		# CyCOG stuff
+		cycog_id => {
+			label => 'CyCOG ID',
+			macro => 'cycog_id_link',
+			render => [ 'render_cycog_link', ' "CyCOG:" + d ' ],
+		},
+		cycog_description => {
+			label => 'Description',
+			macro => 'cycog_description_link'
+			render => [ 'render_cycog_link', ' d ' ],
+		},
+		cycog_version => {
+			label => 'CyCOG version',
+			macro => 'cycog_version_link'
+		},
+
+		cbox_cycog => {
+			label => '',
+			macro => 'cbox_cycog'
+		},
+		## functions!
+# 		dbxref => {
+# 			label => 'DB Ref',
+# 			macro =>
+#
+# 		},
+
+		cbox_gene => {
+			label => '',
+			macro => 'cbox_gene',
+		},
+
+		cbox_taxon => {
+			label => '',
+			macro => 'cbox_taxon',
+		},
+
+		cbox_scaffold => {
+			label => '',
+			macro => 'cbox_scaffold',
+		}
+	};
+
+
+
+	MACRO labeller( attr ) BLOCK;
+
+		# if the string exists in name_h, replace it with the name
+		IF metadata_h.$attr && metadata_h.$attr.exists('label');
+			metadata_h.$attr.label;
+		ELSE;
+			txt = '';
+			IF attr.match('.');
+				IF metadata_h.$attr.label;
+					txt = metadata_h.$attr.label;
+				ELSE;
+					spl = attr.split('\.');
+					spl_last = spl.last;
+					IF metadata_h.${spl.last}.label;
+						txt = metadata_h.${spl.last}.label;
+					ELSE;
+						txt = spl_last.replace('_',' ') | ucfirst;
+					END;
+				END;
+			END;
+			IF txt != '';
+				txt;
+			ELSE;
+			# replace the '_' with spaces, uppercase the first letter
+				attr.replace('_',' ') | ucfirst;
+			END;
+		END;
+	END;
+
+	MACRO display_datum ( display_args ) BLOCK;
+		obj = display_args.obj;
+		attr = display_args.attr;
+
+		IF metadata_h.$attr.macro;
+			mac = metadata_h.$attr.macro;
+			$mac( display_args );
+		ELSE;
+			obj.$attr;
+		END;
+
+		units( attr );
+	END;
+
+
+	# given an object and an attribute, find the label for it
+	# slightly different way to call the 'labeller' macro above
+	MACRO label_from_attr( args ) BLOCK;
+		obj = args.obj;
+		attr = args.attr;
+		labeller( obj.$attr );
+	END;
+
+
+	MACRO units( str ) BLOCK;
+
+		IF metadata_h.$str && metadata_h.$str.unit;
+			' ' _ metadata_h.$str.unit;
+		END;
+
+	END; # end macro
+
+	MACRO linker( str, obj ) BLOCK;
+
+		IF metadata_h.$str && metadata_h.$str.ext_link; %]
+<a rel="external" href="[% ext_link( metadata_h.$str.ext_link ) %][% obj.$str %]">[% obj.$str %]</a>
+[%		ELSE;
+			obj.$str;
+		END;
+
+	END; # end macro
+
+
+	MACRO web_safe_text( string ) BLOCK;
+
+		string.replace('\W+','_');
+
+	END;
+
+	### Renderers for datatables.js ###
+
+	MACRO render_details_link( domain ) BLOCK; %]
+		render: function( d, t, r ){
+			return '<a href="/details/[% domain %]/' + r.[% domain %]_oid + '">' + d + '</a>';
+		},
+[%	END;
+
+	MACRO render_cycog_link( text_insert ) BLOCK; %]
+	render: function( d, t, r ){
+		return '<a href="/details/function/cycog/' + r.cycog_id + '">' + [% text_insert %] + '</a>';
+		},
+[$	END;
+
+
+	MACRO render_ext_link( blob ) BLOCK; %]
+		render: function( d, t, r ){
+
+		},
+[%	END;
+
+	MACRO render_getLabel( args ) BLOCK; %]
+		render: function( d ){ return getLabel('[% args %]', d); },
+[%
+	END;
+
+	MACRO render_text( attr ) BLOCK;
+		IF metadata_h.$attr && metadata_h.$attr.render;
+			arr = metadata_h.$attr.render
+			mac = arr.first;
+			$mac( arr.last );
+		END;
+	END;
+
+%]

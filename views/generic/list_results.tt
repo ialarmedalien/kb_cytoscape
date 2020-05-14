@@ -1,0 +1,82 @@
+[%	WRAPPER 'inc/page_wrapper.tt';
+	title = results.domain _ ' List' | ucfirst;
+	page_slug = results.domain _ '_list';
+	result_list_id = results.domain _ "-list";
+
+	PROCESS 'inc/generic/link.tt';
+	PROCESS 'inc/generic/labels.tt';
+	PROCESS 'inc/paged.tt';
+
+	BLOCK query_params;
+
+		PROCESS 'inc/params.tt';
+
+	END;
+
+	BLOCK no_results;
+
+%]
+<p class="[% results.table.class %]__count">No results found.</p>
+[%
+	END;
+
+	BLOCK result_list;
+
+	IF results.defined('paging') && results.paging.n_results && results.paging.n_results > 0 %]
+<p class="[% results.table.class %]__count">[% results.paging.n_results %] results</p>
+[%	END;
+
+	table_class = page_slug _ '__table';
+	form_id = table_class _ '__form';
+	data_table = {
+		class => table_class,
+		id => table_class,
+		for_datatables_js => 1,
+		tbody => results.js.arr,
+		thead => {
+			enum => results.js.table_cols,
+		},
+		form_id => form_id
+	};
+	wrapper = 'inc/cart/' _ results.domain _ '_add.tt';
+
+#	WRAPPER $wrapper;
+	PROCESS 'inc/generic/table.tt';
+#	END;
+
+		IF results.paging.page_count > 1;
+
+			page({
+				class => 'paging',
+				page_data => results.paging,
+				params => results.params
+			});
+
+		END;
+
+	END; # end block
+
+	article_title = title;
+	PROCESS 'inc/generic/container_macros.tt';
+	PROCESS 'inc/generic/title.tt';
+	PROCESS 'inc/params.tt';
+
+	IF results.js.arr.size > 0;
+
+		layout_page( [{ id => 'result_list' }] );
+		table_arr = [ result_list_id ];
+
+		PROCESS 'scripts/datatables.tt';
+
+	#	PROCESS 'inc/generic/table.tt';
+	#	WRAPPER 'inc/cart/taxon_add.tt';
+
+	ELSE;
+
+		layout_page( [{ id => 'no_results' }] );
+
+	END;
+
+END; %]
+
+

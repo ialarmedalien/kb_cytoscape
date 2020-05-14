@@ -1,0 +1,130 @@
+[%
+
+	PROCESS 'inc/generic/labels.tt';
+
+	# generate_attr_val
+	#	obj -- object
+	#	attr -- the object property to retrieve
+	#	class -- the class for
+	#	if_present -- if this is true, will only print the value if it is present
+
+	MACRO generate_attr_val( obj, attr, if_present ) BLOCK;
+#		IF ! dt_dd_class;
+			dt_dd_class = 'tabular';
+#		END;
+
+		## only print if there is data
+		IF ( ! if_present ) || ( if_present && obj.$attr ); %]
+		<dt class='[% dt_dd_class %]__attr'>
+[%			labeller( attr ); %]
+		</dt><dd class='[% dt_dd_class %]__value'>
+			[%	obj.$attr %]
+		</dd>
+[%		END;
+
+	END; # end macro
+
+
+	# infobox wrapper
+	# args -- ibox hash with keys
+	# ibox.class    class for section (optional -- will be set to ibox.id if unset)
+	# ibox.id       id for internal links
+	# ibox.title    title for the section
+
+	BLOCK infobox;
+
+		IF ! ibox.class;
+			ibox.class = ibox.id;
+		END; %]
+	<section class="[% ibox.class %]"[% IF ibox.id %] id="[% ibox.id %]"[% END %]>
+[%		IF ibox.title %]
+		<h4 class="[% ibox.class %]__title">[% ibox.title %]</h4>
+[%		END;
+		content;
+		IF ibox.omit_top_link;
+			# don't do anything!
+		ELSE; %]
+	<p class="to-top__line"><a class="to-top__link" href="#top">back to top</a></p>
+[%		END; %]
+	</section>
+[%	END; # end infobox
+
+
+	BLOCK list_container %]
+	<ul class="[% class_name %]__list[%
+		IF class_suffix; '--' _ class_suffix; END; %]">
+[%	content %]
+	</ul>
+[%	END;
+
+
+	BLOCK list_item %]
+		<li class="[% class_name %]__item[%
+			IF class_suffix; '--' _ class_suffix; END; %]">
+[%	content %]
+		</li>
+[%	END;
+
+	# in-page navigation item
+	# args -- pagenav hash with keys
+	# pagenav.class    class for section  (optional -- will be set to 'page-nav')
+	# pagenav.id       id (optional)
+	# pagenav.links    arrayref of pairs to put in the menu; should be in the format
+	# pagenav.numeric  use an <ol> instead of a <ul> element
+	# [ $section_id, "Section name" ],
+
+	MACRO in_page_nav( pagenav ) BLOCK;
+
+	IF ! pagenav.class;
+		pagenav.class = 'page-nav';
+	END;
+
+	list_el = 'ul';
+	IF pagenav.numeric;
+		list_el = 'ol';
+	END;
+
+	%]
+	<div class="[% pagenav.class %]__container">
+		<[% list_el %] class="[% pagenav.class %]__list">
+[%		FOR nav IN pagenav.links; %]
+			<li class="[% pagenav.class %]__item">
+				<a href="#[% nav.id %]">[% nav.title %]</a>
+			</li>
+[%		END %]
+		</[% list_el %]>
+	</div>
+[%	END; # end in_page_nav block
+
+
+	# lay out a page
+	# args:
+	#	sections -- array of section names and IDs
+	#
+
+	MACRO layout_page( sections, p_nav ) BLOCK;
+
+		IF ! p_nav;
+			p_nav = {};
+		END;
+		p_nav.links = sections;
+
+		IF sections.size > 1;
+			in_page_nav( p_nav );
+		END;
+
+		%]
+	<div class="content__container cf">
+[%
+		FOR secn IN sections;
+
+			ibox = { id => secn.id, title => secn.title };
+			stuff = secn.content or secn.id;
+			PROCESS $stuff WRAPPER 'infobox';
+
+		END;
+%]
+	</div>
+[%
+	END; # end layout_page macro
+%]

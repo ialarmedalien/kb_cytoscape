@@ -1,0 +1,66 @@
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/fh-3.1.6/r-2.2.3/sc-2.0.1/datatables.min.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/static/narrative/kbase-extension/static/kbase/css/kbaseStylesheet.css" >
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/fh-3.1.6/r-2.2.3/sc-2.0.1/datatables.min.js"></script>
+[% IF file_format && ( file_format == 'csv' || file_format == 'tsv' )
+    || include_dsv_parser %]
+<script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+<script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+[% END %]
+<style>
+    .kb-html-report {
+        padding: 0 2rem;
+    }
+    .kb-html-report > .panel {
+        border-width: 0;
+    }
+    .kb-html-report .nav.nav-tabs {
+        margin: 0 -2rem 1rem;
+        padding-left: 2rem;
+    }
+    .progress-bar-null {
+        background-color: #efefef;
+    }
+.tabular {
+  overflow: hidden;
+  z-index: 1;
+  position: relative; }
+
+.tabular dl, .tabular dt, .tabular dd {
+  margin: 0;
+  padding: 0;
+  position: relative; }
+
+.tabular dt, .tabular dd {
+  display: inline-block;
+  vertical-align: top;
+  padding: 12px 2%;
+  padding: 0.75rem 2%;
+  position: relative;
+  border-top: 1px solid #ccc; }
+
+.tabular dt {
+  width: 29%; }
+
+.tabular dd {
+  width: 69%; }
+
+.tabular dd + dd {
+  border-top-color: #fff; }
+
+.tabular dt:after, .tabular dd:after {
+  content: " ";
+  position: absolute;
+  display: block;
+  left: -999em;
+  top: -2px;
+  bottom: 0;
+  right: -999em;
+  z-index: -1; }
+
+.tabular dd + dd {
+  margin-left: 30%; }
+
+</style>

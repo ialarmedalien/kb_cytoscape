@@ -1,0 +1,75 @@
+[%	# a generic checkbox
+	# arguments (as a hash):
+	# name, value, id
+	# optional: class, status (checked or otherwise)
+
+	# label.where => before | after | around
+	#      .text
+	#      .class
+
+MACRO checkbox ( x ) BLOCK;
+
+	IF x.defined('label');
+		IF 'before' == x.label.where || 'around' == x.label.where;
+%]	<label for="[% x.id %]"[%
+			IF x.label.defined('class');
+				%] class="[% x.label.class %]"[%
+			END;
+%]>[% x.label.text %][%
+		END;
+		IF 'before' == x.label.where; %]
+</label>
+[%		END;
+	END; # end label defined%]
+	<input type="checkbox" name="[% x.name %]" value="[% x.value %]" [%
+
+		IF x.id;
+			%] id="[% x.id %]"[%
+		END;
+
+		IF x.class;
+			%] class="[% x.class %]"[%
+		END;
+
+		IF x.status;
+			' ' _ x.status;
+		END;
+	%] />
+[%	IF x.defined('label');
+		IF 'around' == x.label.where; %]
+</label>
+[%		END;
+		IF 'after' == x.label.where;
+%]	<label for="[% x.id %]"[%
+			IF x.label.defined('class');
+				%] class="[% x.label.class %]"[%
+			END;
+%]>[% x.label.text %]</label>
+[%		END;
+	END;
+
+END; # end MACRO checkbox
+
+MACRO cbox_taxon ( args ) BLOCK;
+
+	str = 'cbox_' _ args.obj.taxon_oid;
+	checkbox({ id => str, name => 'taxon_oid[]', value => args.obj.taxon_oid });
+
+END;
+
+MACRO cbox_gene ( args ) BLOCK;
+
+	str = 'cbox_' _ args.obj.gene_oid;
+	checkbox({ id => str, name => 'gene_oid[]', value => args.obj.gene_oid });
+
+END;
+
+MACRO cbox_scaffold ( args ) BLOCK;
+
+	str = 'cbox_' _ args.obj.scaffold_oid;
+	checkbox({ id => str, name => 'scaffold_oid[]', value => args.obj.scaffold_oid });
+
+END;
+
+
+%]

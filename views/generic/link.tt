@@ -1,0 +1,179 @@
+[%	# a generic link
+	# arguments (as a hash called 'x'):
+	# type, params -- to feed into the link as link( x.type, x.params )
+	# text -- link text
+	# optional: class, id, title -- link class, id, title
+
+	MACRO generic_link( x ) BLOCK;
+
+	err = undef;
+%]<a [%
+	IF x.exists('class');
+%]class="[% x.class %]" [%
+	END;
+
+	IF x.exists('id');
+%]id="[% x.id %]" [%
+	END;
+
+	IF x.exists('title');
+%]title="[% x.title %]" [%
+	END;
+
+	%]href="[%
+
+		#
+	TRY;
+		link( x.type, x.params );
+	CATCH;
+		err = error;
+	END;
+
+	%]">[% x.text %]</a>[%
+
+	IF err;
+		'link making did not work! ';
+		USE Dumper( Indent => 1 );
+		'<pre>' _ Dumper.dump( x ) _ '</pre>';
+		error;
+	END;
+
+
+	END; # end MACRO generic_link
+
+	MACRO taxon_id_link ( args ) BLOCK;
+		args.text = args.obj.taxon_oid;
+		args.type = 'details';
+		args.params = { domain => 'taxon', taxon_oid => args.obj.taxon_oid };
+		generic_link( args );
+	END;
+
+	MACRO taxon_name_link ( args ) BLOCK;
+		args.text = args.obj.taxon_display_name;
+		args.type = 'details';
+		args.params = { domain => 'taxon', taxon_oid => args.obj.taxon_oid };
+		generic_link( args );
+	END;
+
+	MACRO gene_id_link ( args ) BLOCK;
+		args.text = args.obj.gene_oid;
+		args.type = 'details';
+		args.params = { domain => 'gene', gene_oid => args.obj.gene_oid };
+		generic_link( args );
+	END;
+
+	MACRO gene_name_link ( args ) BLOCK;
+		args.text = args.obj.gene_display_name;
+		args.type = 'details';
+		args.params = { domain => 'gene', gene_oid => args.obj.gene_oid };
+		generic_link( args );
+	END;
+
+	MACRO scaffold_id_link ( args ) BLOCK;
+		args.text = args.obj.scaffold_oid;
+		args.type = 'details';
+		args.params = { domain => 'scaffold', scaffold_oid => args.obj.scaffold_oid };
+		generic_link( args );
+	END;
+
+	MACRO scaffold_name_link ( args ) BLOCK;
+		args.text = args.obj.scaffold_name;
+		args.type = 'details';
+		args.params = { domain => 'scaffold', scaffold_oid => args.obj.scaffold_oid };
+		generic_link( args );
+	END;
+
+	MACRO scaffold_dbxref ( args ) BLOCK;
+		IF args.obj.db_source && args.obj.ext_accession;
+			external_link({ db => args.obj.db_source, xref => args.obj.ext_accession });
+		END;
+	END;
+
+	MACRO cycog_id_link ( args ) BLOCK;
+		args.text = 'CyCOG:' _ ( args.obj.cycog_id || args.obj.id );
+		args.type = 'fn_details';
+		args.params => { db => 'cycog', xref => ( args.obj.cycog_id || args.obj.id )};
+		generic_link( args );
+	END;
+
+	MACRO cycog_description_link ( args ) BLOCK;
+		IF args.obj.cycog_description;
+			args.text = args.obj.cycog_description;
+		ELSE;
+			args.text = args.obj.description;
+		END;
+		args.type = 'fn_details';
+		args.params => { db => 'cycog', xref => ( args.obj.cycog_id || args.obj.id )};
+		generic_link( args );
+	END;
+
+	MACRO cycog_version ( args ) BLOCK;
+		args.text = 'v' _ args.obj.version;
+		args.type = 'details';
+		args.params = { cycog_version => args.obj.version };
+		generic_link( args );
+	END;
+
+
+	MACRO function_link ( args ) BLOCK;
+	#	input hashref
+	#	args.db
+	#	args.xref
+-%]
+<a [%
+	IF args.exists('class');
+%]class="[% args.class %]" [%
+	END;
+
+	IF args.exists('id');
+%]id="[% args.id %]" [%
+	END;
+
+	IF args.exists('title');
+%]title="[% args.title %]" [%
+	END;
+	%]href="[%
+		link( 'fn_details', { db => args.db, xref => args.xref } );
+	%]">[% args.text %]</a>
+[%-	END;
+
+	MACRO external_link ( args ) BLOCK;
+	TRY;
+		IF args.type;
+			link_url = ext_link( args.type, args.params );
+		ELSE;
+			link_url = ext_link( args.db, args.xref );
+		END;
+	CATCH;
+		# erk!
+	END;
+
+	IF link_url; %]
+<a rel="external" [%
+	IF args.exists('class');
+%]class="[% args.class %]" [%
+	END;
+
+	IF args.exists('id');
+%]id="[% args.id %]" [%
+	END;
+
+	IF args.exists('title');
+%]title="[% args.title %]" [%
+	END;
+
+	%]href="[% link_url %]">[%
+	END;
+
+	IF args.text;
+		args.text;
+	ELSE;
+		args.db _ ':' _ args.xref;
+	END;
+
+	IF link_url;
+	%]</a>[%
+	END;
+END; # end macro
+
+%]

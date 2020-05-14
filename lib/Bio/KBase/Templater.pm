@@ -49,9 +49,10 @@ sub render_template {
     my ( $template, $template_data, $output, $arguments, $config ) = @_;
 
     $config //= {
-        TRIM        => 1,
-        ABSOLUTE    => 1,
-        RELATIVE    => 1,
+        TRIM            => 1,
+        ABSOLUTE        => 1,
+        RELATIVE        => 1,
+        INCLUDE_PATH    => '/kb/module/views:/kb/module',
     };
 
     $arguments  //= { binmode => ':utf8' };

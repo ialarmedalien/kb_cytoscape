@@ -87,7 +87,7 @@ sub run_kb_cytoscape {
     my $cytoscape_path = catfile( $self->{ scratch }, 'cytoscape.html' );
 
     Bio::KBase::Template::render_template(
-        catfile( self->{ appdir }, 'templates', 'cytoscape.tt' ),
+        catfile( self->{ appdir }, 'views', 'cytoscape.tt' ),
         { template_data => $tmpl_data },
         $cytoscape_path,
     );

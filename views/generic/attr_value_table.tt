@@ -1,0 +1,306 @@
+    MACRO attr_value_table( data_table ) BLOCK;
+
+    # Create a table for showing simple attribute-value data
+
+      IF data_table.tbody.size > 0;
+        headers = data_table.thead; %]
+      <table class="[% data_table.class %]__table">
+[%
+        IF data_table.caption;
+%]
+        <caption class="[% data_table.class %]__caption">[% data_table.caption %]</caption>
+[%
+        END;
+%]
+        <thead class="[% data_table.class %]__thead">
+          <tr>
+[%
+        IF data_table.thead.enum;
+          FOR th IN headers.enum; %]
+            <th class='[% data_table.class %]__th--[% th %]'>[%
+            IF headers.enum_map.$th;
+              headers.enum_map.$th;
+            ELSIF 'cbox' != th;
+              labeller( th );
+            END; %]
+            </th>
+[%
+          END; # end FOR th IN headers.enum
+        ELSE;
+%]
+            <th class="[% data_table.class %]__th--attr">Attribute</th>
+            <th class="[% data_table.class %]__th--value">Value</th>
+[%
+        END; %]
+          </tr>
+        </thead>
+        <tbody class="[% data_table.class %]__tbody">
+[%
+        FOR datum IN data_table.tbody; %]
+          <tr[%
+            IF datum.__id;
+            ' id="' _ datum.__id _ '"';
+            END;
+            IF datum.__class;
+            ' class="' _ datum.__class _ '"';
+            END; %]>
+            <td class="[% data_table.class %]__tcell--attr">
+[%          datum.first; %]
+            </td>
+            <td class="[% data_table.class %]__tcell--val">
+[%          datum.last %]
+            </td>
+          </tr>
+[%
+        END; # FOR datum in data_table.tbody %]
+        </tbody>
+      </table>
+[%
+      END; # if data_table.tbody.size
+
+    END; # end macro block
+
+%]
+
+
+[%	#	create a definition list of attribute / value pairs
+	#	args:
+	#	.obj -- object to get keys from
+	#	.class, .id -- dl class, id (optional)
+	#	.with_units
+	#	.prefix -- prefix for the object attributes
+	#
+	#	.arr -- array of object attributes
+	#	OR
+	#	.prefix_arr -- array of object attributes (add .prefix to get the full attr name)
+	#	OR
+	#	.tbody -- [ 'tag', 'value' ]
+	#	OR
+	#	fn_arr -- for annotation lists
+
+	PROCESS 'inc/generic/labels.tt';
+
+	MACRO attr_value_dl( data_table ) BLOCK;
+		dl_class = data_table.class;
+		obj = data_table.obj;
+
+		IF data_table.caption; %]
+	<h5[% IF data_table.caption_id %] id="[% data_table.caption_id %]"[% END; %]>
+		[% data_table.caption %]
+	</h5>
+[%
+END;
+%]
+	<dl class="tabular [% dl_class %]"[%
+		IF data_table.id;
+		%] id="[% data_table.id %]"[%
+		END;
+		%]>
+[%
+	IF data_table.arr;
+		FOREACH datum IN data_table.arr;
+			attr = datum.first;
+			if_present = datum.1 || 0;
+			## only print if there is data
+			IF ( ! if_present ) || ( if_present && obj.$attr ); %]
+		<dt class='[% dl_class %]__attr'>
+[%				labeller( attr ) %]
+		</dt><dd class='[% dl_class %]__value'>
+			[%	IF obj.$attr;
+					obj.$attr;
+					IF data_table.with_units;
+						units( attr );
+					END;
+				END; %]
+		</dd>
+[%			END;
+		END; # FOREACH datum in data_table.arr
+	END;
+
+	#	Prefixed array -- apply the data_table.prefix to each member of the array
+	#
+	#
+
+	IF data_table.prefix_arr;
+		prefix = data_table.prefix;
+		FOREACH datum IN data_table.prefix_arr;
+			attr = prefix _ datum.first;
+			if_present = datum.1 || 0;
+			## only print if there is data
+			IF ( ! if_present ) || ( if_present && obj.$attr ); %]
+		<dt class='[% dl_class %]__attr'>
+[%				labeller( datum.first ) %]
+		</dt><dd class='[% dl_class %]__value'>
+			[%	IF obj.$attr;
+					obj.$attr;
+					IF data_table.with_units;
+						units( attr );
+					END;
+				END; %]
+		</dd>
+[%			END;
+		END; # FOREACH datum in data_table.arr
+	END;
+
+	IF data_table.tbody;
+		FOREACH datum IN data_table.tbody; %]
+		<dt class="[% dl_class %]__attr">
+[%			datum.first; %]
+		</dt><dd class="[% dl_class %]__value">
+[%			datum.last %]
+		</dd>
+[%		END; # FOREACH datum in data_table.tbody
+	END; # end data_table.tbody
+
+	IF data_table.fn_arr;
+
+		FOR fn IN data_table.fn_arr;
+		annot_name = 'annot_' _ fn.last;
+			IF self.$annot_name && self.$annot_name.size > 0; %]
+		<dt>[% fn.first %]</dt>
+[%	#	'<pre class="debug">' _ Dumper.dump( fn ) _ '</pre>';
+				FOR x IN self.$annot_name; %]
+		<dd>
+[%					TRY;
+				external_link({ db => x.db, xref => x.xref });
+					CATCH;
+			#	'<pre>' _ error _ '</pre>';
+				x.db _ ':' _ x.xref;
+					END;
+			': ' _ x.name; %]
+		</dd>
+[%				END;
+			END;
+		END;
+	END;
+
+
+		IF data_table.proplist;
+			FOR datum IN proplist;
+				attr = datum.first;
+				if_present = datum.last || 0;
+				## only print if there is data
+				IF ( ! if_present ) || ( if_present && obj.$attr ); %]
+			<dt class="[% dl_class %]__attr">
+[%				labeller( attr ) %]
+			</dt>[%
+					FOR fn IN obj.$attr;
+			%]<dd class='[% dl_class %]__value'>
+
+
+			</dd>[%
+
+					END;
+
+				END;
+			END;
+		END;
+
+
+%]
+	</dl>
+[%	END; # end macro
+
+
+	# A generic table component with a column of attributes on the left and values
+	# on the right
+# params:
+# data_table hashref with keys
+# .class          => css class for the table
+# .caption        => table caption
+# .thead.enum     => arrayref of object properties to be included in the table
+# .thead.enum_map => hashref with column titles (corresponding to object properties)
+#                    will default to 'Attribute' and 'Value' if not set
+# .tbody          => arrayref of objects for the table
+
+#PROCESS 'inc/generic/cbox.tt';
+#PROCESS 'inc/generic/link.tt';
+
+# table row view
+# if the item is a scalar, prints it out
+# if the item is a hash, gets the 'macro' hash key, runs it, and prints the result
+VIEW t_cell;
+
+	BLOCK text; %]
+	<td class="[% data_table.class %]__tcell--attr">
+[%		item.split('_').join(' ') | ucfirst; %]
+	</td>
+	<td class="[% data_table.class %]__tcell--val">
+[%		DATA_THING.$item %]
+	</td>
+[%	END;
+
+	BLOCK list; %]
+	<td class="[% data_table.class %]__tcell--attr">
+[%		item.first %]
+	</td>
+	<td class="[% data_table.class %]__tcell--val">
+[%		item.last %]
+	</td>
+[%	END;
+
+	BLOCK hash;
+		mac = item.macro;
+		x = item;
+		TRY;
+			$mac( x );
+		CATCH;
+			USE Dumper( Indent => 1 );
+			'<pre>link error: ' _ Dumper.dump( item ) _ '</pre>';
+			error;
+		END;
+	END;
+END; # end view t_cell
+
+MACRO attr_value_table( data_table ) BLOCK;
+
+IF data_table.tbody.size > 0;
+	headers = data_table.thead; %]
+	<table class="[% data_table.class %]__table">
+[%	IF data_table.caption %]
+	<caption class="[% data_table.class %]__caption">[% data_table.caption %]</caption>
+[%	END %]
+	<thead class="[% data_table.class %]__thead">
+	<tr>
+[%	IF data_table.thead.enum;
+		FOREACH th IN headers.enum; %]
+		<th class='[% data_table.class %]__th--[% th %]'>[%
+			IF headers.enum_map.$th;
+				headers.enum_map.$th;
+			ELSIF 'cbox' != th;
+				labeller( th );
+			END; %]
+		</th>
+[%			END;
+	ELSE; %]
+		<th class="[% data_table.class %]__th--attr">Attribute</th>
+		<th class="[% data_table.class %]__th--value">Value</th>
+[%	END; %]
+	</tr>
+	</thead>
+	<tbody class="[% data_table.class %]__tbody">
+[%
+	FOREACH datum IN data_table.tbody; %]
+		<tr[%
+		IF datum.__id;
+		' id="' _ datum.__id _ '"';
+		END;
+		IF datum.__class;
+		' class="' _ datum.__class _ '"';
+		END; %]>
+			<td class="[% data_table.class %]__tcell--attr">
+[%			datum.first; %]
+			</td>
+			<td class="[% data_table.class %]__tcell--val">
+[%			datum.last %]
+			</td>
+		</tr>
+[%	END; # FOREACH datum in data_table.tbody %]
+	</tbody>
+	</table>
+[%
+END; # if data_table.tbody.size
+
+END; # end macro block
+
+%]
