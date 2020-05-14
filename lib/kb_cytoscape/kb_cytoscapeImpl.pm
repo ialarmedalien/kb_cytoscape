@@ -21,11 +21,13 @@ A KBase module: kb_cytoscape
 =cut
 
 #BEGIN_HEADER
+
 use File::Spec::Functions qw( catfile catdir );
 use Bio::KBase::AuthToken;
-use Bio::KBase::Templater;
+use Bio::KBase::Templater qw( render_template );
 use installed_clients::KBaseReportClient;
 use Config::IniFiles;
+
 #END_HEADER
 
 sub new {
@@ -85,7 +87,7 @@ sub run_kb_cytoscape {
     # create the cytoscape report
     my $cytoscape_path = catfile( $self->{ scratch }, 'cytoscape.html' );
 
-    Bio::KBase::Template::render_template(
+    render_template(
         catfile( $self->{ appdir }, 'views', 'cytoscape.tt' ),
         { template_data => '' },
         $cytoscape_path,

@@ -21,34 +21,34 @@ sub new {
         timeout => 10,
     );
 
-    my $logger = get_logger();
-
-    $ua->add_handler( request_prepare => sub {
-        my $request = shift;
-
-        $logger->debug( message => {
-            event   => 'JSONRPC_request_send',
-            request => {
-                method  => $request->method,
-                uri     => $request->uri,
-                headers => { $request->headers->flatten },
-                content => $request->content,
-            }
-        } );
-    } );
-
-    $ua->add_handler( response_done => sub {
-        my $response = shift;
-
-        $logger->debug( message => {
-            event       => 'JSONRPC_response_done',
-            response    => {
-                code    => $response->code,
-                headers => { $response->headers->flatten },
-            },
-        } );
-        $logger->trace( content => $response->decoded_content ) if $logger->is_trace;
-    } );
+#     my $logger = get_logger();
+#
+#     $ua->add_handler( request_prepare => sub {
+#         my $request = shift;
+#
+#         $logger->debug( message => {
+#             event   => 'JSONRPC_request_send',
+#             request => {
+#                 method  => $request->method,
+#                 uri     => $request->uri,
+#                 headers => { $request->headers->flatten },
+#                 content => $request->content,
+#             }
+#         } );
+#     } );
+#
+#     $ua->add_handler( response_done => sub {
+#         my $response = shift;
+#
+#         $logger->debug( message => {
+#             event       => 'JSONRPC_response_done',
+#             response    => {
+#                 code    => $response->code,
+#                 headers => { $response->headers->flatten },
+#             },
+#         } );
+#         $logger->trace( content => $response->decoded_content ) if $logger->is_trace;
+#     } );
 
     $self->ua( $ua );
     $self->json( $proto->create_json_coder );
