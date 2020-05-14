@@ -9,6 +9,7 @@ on:
 jobs:
 
   install_kbsdk_and_test:
+    needs: push_to_dockerhub
     runs-on: ubuntu-latest
     steps:
     - name: checkout git repo
@@ -24,3 +25,21 @@ jobs:
         docker run ialarmedalien/kb-sdk genscript > $GITHUB_WORKSPACE/kb-sdk
         chmod 755 $GITHUB_WORKSPACE/kb-sdk
         $GITHUB_WORKSPACE/kb-sdk test
+
+  push_to_dockerhub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build & Push to Docker Hub
+        uses: opspresso/action-docker@master
+        with:
+          args: --docker
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE_NAME: "ialarmedalien/modernperl_base"
+          DOCKERFILE: "Dockerfile_perlbase"
+          TAG_NAME: "kb_cytoscape"
+          LATEST: "true"
