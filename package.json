@@ -1,0 +1,22 @@
+{
+  "name": "kb_cytoscape",
+  "version": "1.0.0",
+  "description": "a kbase wrapper for cytoscape",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ialarmedalien/kb_cytoscape.git"
+  },
+  "keywords": [
+    "cytoscapejs"
+  ],
+  "author": "ialarmedalien",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ialarmedalien/kb_cytoscape/issues"
+  },
+  "homepage": "https://github.com/ialarmedalien/kb_cytoscape#readme"
+}
