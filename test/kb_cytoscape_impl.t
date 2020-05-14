@@ -106,7 +106,7 @@ subtest 'testing run_kb_cytoscape' => sub {
     # fetch the report and check that the contents are as expected
 
     my $report_object = $ws_client->get_objects2({
-        objects => [ { ref => $result->{ report_ref } ]
+        objects => [ { ref => $result->{ report_ref } } ]
     });
     my $report = $report_object->{ data }[ 0 ]{ data };
 

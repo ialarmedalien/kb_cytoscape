@@ -43,10 +43,6 @@ sub log_info {
     shift->_say_msg( @_ );
 }
 
-sub log_info {
-    shift->_say_msg( @_ );
-}
-
 sub _say_msg {
     my ( $self, $msg ) = @_;
     say STDERR $msg;
