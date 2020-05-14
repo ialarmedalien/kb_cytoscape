@@ -24,6 +24,7 @@ A KBase module: kb_cytoscape
 
 use feature qw( say );
 use File::Spec::Functions qw( catfile catdir );
+use File::Copy;
 use Bio::KBase::AuthToken;
 use Bio::KBase::Templater qw( render_template );
 use installed_clients::KBaseReportClient;
@@ -129,7 +130,10 @@ sub run_kb_cytoscape {
     );
 
     my $data_dir = catdir( $self->{ appdir }, 'data' );
-    my $package = catfile( $self->{ appdir }, 'package.json' );
+    copy(
+        catfile( $self->{ appdir }, 'package.json' ),
+        catfile( $self->{ scratch }, 'package.json' )
+    );
 
     my $report = $kb_report_client->create_extended_report( {
         workspace_name => $params->{ workspace_name },
@@ -145,7 +149,7 @@ sub run_kb_cytoscape {
                 name        => 'data',
                 description => 'cytoscape data dir',
             }, {
-                path        => $package,
+                path        => catfile( $self->{ scratch }, 'package.json' ),
                 name        => 'package.json',
                 description => 'package file',
             }
