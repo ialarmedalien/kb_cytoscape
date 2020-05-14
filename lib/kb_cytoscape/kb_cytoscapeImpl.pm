@@ -25,7 +25,6 @@ use File::Spec::Functions qw( catfile catdir );
 use Bio::KBase::AuthToken;
 use Bio::KBase::Templater;
 use installed_clients::KBaseReportClient;
-use JSON::MaybeXS;
 use Config::IniFiles;
 #END_HEADER
 
@@ -87,8 +86,8 @@ sub run_kb_cytoscape {
     my $cytoscape_path = catfile( $self->{ scratch }, 'cytoscape.html' );
 
     Bio::KBase::Template::render_template(
-        catfile( self->{ appdir }, 'views', 'cytoscape.tt' ),
-        { template_data => $tmpl_data },
+        catfile( $self->{ appdir }, 'views', 'cytoscape.tt' ),
+        { template_data => '' },
         $cytoscape_path,
     );
 
