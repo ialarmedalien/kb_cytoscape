@@ -97,15 +97,17 @@ sub run_kb_cytoscape {
 
     my $report = $kb_report_client->create_extended_report( {
         workspace_name => $params->{ workspace_name },
-        html_files      => [
+        html_links      => [
             {
-                name    => 'cytoscape.html',
-                path    => $cytoscape_path,
+                name        => 'cytoscape.html',
+                path        => $cytoscape_path,
+                description => 'Cytoscape graph viewer',
 
             }, {
                 # data directory
-                path    => $data_dir,
-                name    => 'data',
+                path        => $data_dir,
+                name        => 'data',
+                description => 'cytoscape data dir',
             },
         ],
         direct_html_link_index  => 0,

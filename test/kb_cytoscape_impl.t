@@ -116,13 +116,18 @@ subtest 'testing run_kb_cytoscape' => sub {
         'file_links'    => [],
         'html_links'    => [
             {
-                name    => 'cytoscape.html',
-                path    => 'something or other',
-
+                URL         => re('https:.*?\.kbase\.us.+'),
+                name        => 'cytoscape.html',
+                description => 'Cytoscape graph viewer',
+                handle      => re('.*?'),
+                label       => '',
             }, {
                 # data directory
-                path    => 'whatever!',
-                name    => 'data',
+                URL         => re('https:.*?\.kbase\.us.+'),
+                name        => 'data',
+                description => 'cytoscape data dir',
+                handle      => re('.*?'),
+                label       => '',
             },
         ],
         'warnings'      => [],
