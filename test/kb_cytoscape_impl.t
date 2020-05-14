@@ -128,7 +128,14 @@ subtest 'testing run_kb_cytoscape' => sub {
                 description => 'cytoscape data dir',
                 handle      => re('.*?'),
                 label       => '',
-            },
+            }, {
+                # data directory
+                URL         => re('https:.*?\.kbase\.us.+'),
+                name        => 'package.json',
+                description => 'package file',
+                handle      => re('.*?'),
+                label       => '',
+            }
         ],
         'warnings'      => [],
         'direct_html'   => undef,

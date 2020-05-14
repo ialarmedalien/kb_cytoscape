@@ -2,7 +2,7 @@ module-name:
     kb_cytoscape
 
 module-description:
-    A KBase module
+    A KBase module to allow graph visualisation with Cytoscape.
 
 service-language:
     perl

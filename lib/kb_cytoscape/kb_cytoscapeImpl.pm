@@ -2,13 +2,13 @@ package kb_cytoscape::kb_cytoscapeImpl;
 
 use strict;
 use warnings;
-use Bio::KBase::Exceptions;
 
+use Bio::KBase::Exceptions;
 # Use Semantic Versioning (2.0.0-rc.1)
 # http://semver.org
 our $VERSION = '0.0.1';
-our $GIT_URL = '';
-our $GIT_COMMIT_HASH = '';
+our $GIT_URL = 'https://github.com/ialarmedalien/kb_cytoscape.git';
+our $GIT_COMMIT_HASH = '705b53941a72c9c671df726499c9958a865b3d51';
 
 =head1 NAME
 
@@ -22,6 +22,7 @@ A KBase module: kb_cytoscape
 
 #BEGIN_HEADER
 
+use feature qw( say );
 use File::Spec::Functions qw( catfile catdir );
 use Bio::KBase::AuthToken;
 use Bio::KBase::Templater qw( render_template );
@@ -44,6 +45,7 @@ sub new {
     $self->{ appdir }       = $cfg->val( 'kb_cytoscape', 'appdir' );
     $self->{ callbackURL }  = $ENV{ SDK_CALLBACK_URL };
 
+
     #END_CONSTRUCTOR
 
     $self->_init_instance() if $self->can( '_init_instance' );
@@ -53,35 +55,68 @@ sub new {
 
 =head1 METHODS
 
+
+
 =head2 run_kb_cytoscape
 
   $output = $obj->run_kb_cytoscape($params)
 
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+$output is a kb_cytoscape.ReportResults
+ReportResults is a reference to a hash where the following keys are defined:
+	report_name has a value which is a string
+	report_ref has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+$output is a kb_cytoscape.ReportResults
+ReportResults is a reference to a hash where the following keys are defined:
+	report_name has a value which is a string
+	report_ref has a value which is a string
+
+
+=end text
+
+
+
 =item Description
 
-The actual function is declared using 'funcdef' to specify the name
-and input/return arguments to the function.  For all typical KBase
-Apps that run in the Narrative, your function should have the
-'authentication required' modifier.
+This example function accepts any number of parameters and returns results in a KBaseReport
 
 =back
 
 =cut
 
 sub run_kb_cytoscape {
-    my $self = shift;
-    my $params  = @_;
+    my ( $self, $params ) = @_;
     my @bad_arguments;
 
+    push @bad_arguments,
+        { argument => "params", value => $params }
+        unless ref($params) eq 'HASH';
 
     Bio::KBase::Exceptions::ArgumentValidationError->throw(
-        error       => format_error_string( 'argument', '${method.name}', \@bad_returns ),
-        method_name => '${method.name}',
+        error       => format_error_string( 'argument', 'run_kb_cytoscape', \@bad_arguments ),
+        method_name => 'run_kb_cytoscape',
     ) if @bad_arguments;
 
     my $ctx = $kb_cytoscape::kb_cytoscapeServer::CallContext;
-    my $output;
+    my ( $output );
     #BEGIN run_kb_cytoscape
+    say 'Starting run_kb_cytoscape at ' . localtime(time);
+
     my $kb_report_client = installed_clients::KBaseReportClient->new( $self->{ callbackURL } );
 
     # create the cytoscape report
@@ -94,6 +129,7 @@ sub run_kb_cytoscape {
     );
 
     my $data_dir = catdir( $self->{ appdir }, 'data' );
+    my $package = catfile( $self->{ appdir }, 'package.json' );
 
     my $report = $kb_report_client->create_extended_report( {
         workspace_name => $params->{ workspace_name },
@@ -108,7 +144,11 @@ sub run_kb_cytoscape {
                 path        => $data_dir,
                 name        => 'data',
                 description => 'cytoscape data dir',
-            },
+            }, {
+                path        => $package,
+                name        => 'package.json',
+                description => 'package file',
+            }
         ],
         direct_html_link_index  => 0,
         report_object_name      => 'Cytoscape_Report',
@@ -119,18 +159,22 @@ sub run_kb_cytoscape {
         report_ref  => $report->{ ref }
     };
 
+    say 'Finishing run at ' . localtime(time);
     #END run_kb_cytoscape
     my @bad_returns;
-    push @bad_returns, { argument => ${return.name}, value => ${return.perl_var} }
-        unless ${return.validator};
+    push @bad_returns,
+        { argument => "output", value => $output }
+        unless ref($output) eq 'HASH';
 
     Bio::KBase::Exceptions::ArgumentValidationError->throw(
-        error       => format_error_string( 'return', '${method.name}', \@bad_returns ),
-        method_name => '${method.name}',
+        error       => format_error_string( 'return', 'run_kb_cytoscape', \@bad_returns ),
+        method_name => 'run_kb_cytoscape',
     ) if @bad_returns;
 
-    return ( ${method.ret_vars} );
+    return ( $output );
 }
+
+
 
 
 =head2 status
@@ -173,9 +217,48 @@ sub status {
         "git_url"         => $GIT_URL,
         "git_commit_hash" => $GIT_COMMIT_HASH
     };
+
     #END_STATUS
     return ( $return );
 }
+
+=head1 TYPES
+
+
+
+=head2 ReportResults
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+report_name has a value which is a string
+report_ref has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+report_name has a value which is a string
+report_ref has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=cut
 
 sub format_error_string {
     my ( $type, $method_name, $values ) = @_;
@@ -190,5 +273,6 @@ sub format_error_string {
 
     return join "\n", "Invalid " . $type . "s passed to $method_name:", @strings;
 }
+
 
 1;
