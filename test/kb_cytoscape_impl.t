@@ -112,9 +112,9 @@ subtest 'testing run_kb_cytoscape' => sub {
 
     # expect
     my $expected_report_data = {
-        'text_message': undef,
-        'file_links': [],
-        'html_links': [
+        'text_message'  => undef,
+        'file_links'    => [],
+        'html_links'    => [
             {
                 name    => 'cytoscape.html',
                 path    => 'something or other',
@@ -125,12 +125,12 @@ subtest 'testing run_kb_cytoscape' => sub {
                 name    => 'data',
             },
         ],
-        'warnings': [],
-        'direct_html': undef,
-        'direct_html_link_index': 0,
-        'objects_created': [],
-        'html_window_height': undef,
-        'summary_window_height': undef,
+        'warnings'      => [],
+        'direct_html'   => undef,
+        'direct_html_link_index'=> 0,
+        'objects_created'       => [],
+        'html_window_height'    => undef,
+        'summary_window_height' => undef,
     };
 
     cmp_deeply $report, $expected_report_data, 'report contents as expected'
