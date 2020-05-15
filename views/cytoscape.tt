@@ -138,24 +138,6 @@
         }
       ],
     })
-
-
-//     cy.unbind('click')
-//     cy.bind('click', 'node', function(event) {
-//       // .union() takes two collections and adds both together without duplicates
-//       var connected = event.target
-//       connected = connected.union(event.target.predecessors())
-//       connected = connected.union(connected.successors())
-//       // in one line:
-//       // event.target.union(event.target.predecessors().union(event.target.successors()))
-//
-//       // .not() filters out whatever is not specified in connected, e.g. every other node/edge not present in connected
-//       var notConnected = cy.elements().not(connected)
-//
-//       // if you want, you can later add the saved elements again
-//       var saved = cy.remove(notConnected)
-//     })
-
     return graph
   }
 

@@ -46,12 +46,12 @@ sub new {
     my $auth_token  = Bio::KBase::AuthToken->new(
         token           => $ENV{ 'KB_AUTH_TOKEN' },
         ignore_authrc   => 1,
-        auth_svc        => $cfg->val( 'kb_cytoscape', 'auth-service-url' }
+        auth_svc        => $cfg->val( 'kb_cytoscape', 'auth-service-url' ),
     );
 
     $self->{ appdir }       = $cfg->val( 'kb_cytoscape', 'appdir' );
     $self->{ scratch }      = $cfg->val( 'kb_cytoscape', 'scratch' );
-    $self->{ ws_url }       = $cfg->val( 'kb_cytoscape', 'workspace-url' };
+    $self->{ ws_url }       = $cfg->val( 'kb_cytoscape', 'workspace-url' );
     $self->{ callbackURL }  = $ENV{ SDK_CALLBACK_URL };
 
     $self->{ ws_client }    = installed_clients::WorkspaceClient->new(
