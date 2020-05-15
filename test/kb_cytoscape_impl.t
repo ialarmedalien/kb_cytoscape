@@ -15,7 +15,8 @@ say 'environment: ' . Dumper \%ENV;
 require_ok "kb_cytoscape::kb_cytoscapeImpl";
 
 local $| = 1;
-ewewmy $config_file  = $ENV{ 'KB_DEPLOYMENT_CONFIG' };
+my $token        = $ENV{ 'KB_AUTH_TOKEN' };
+my $config_file  = $ENV{ 'KB_DEPLOYMENT_CONFIG' };
 my $callback_url = $ENV{ 'SDK_CALLBACK_URL' };
 
 my $config       = Config::Simple->new( $config_file )->get_block( 'kb_cytoscape' );
