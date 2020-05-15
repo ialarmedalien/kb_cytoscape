@@ -351,7 +351,7 @@
       return
     }
     // datasets is an array of edge type names
-    d3.json('/static/cytoscape/data/djornl_dataset.json')
+    d3.json('djornl_dataset.json')
     .then(all_file_data =>  {
       // keys are assocs, genes, pheno
       let data = {
