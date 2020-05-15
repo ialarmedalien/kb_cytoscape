@@ -53,9 +53,8 @@ sub new {
     $self->{ scratch }      = $cfg->val( 'kb_cytoscape', 'scratch' );
     $self->{ ws_url }       = $cfg->val( 'kb_cytoscape', 'workspace-url' );
     $self->{ callbackURL }  = $ENV{ SDK_CALLBACK_URL };
-
     $self->{ ws_client }    = installed_clients::WorkspaceClient->new(
-        $self->{ ws_url }, token => $token,
+        $self->{ ws_url }, token => $ENV{ 'KB_AUTH_TOKEN' },
     );
 
     #END_CONSTRUCTOR

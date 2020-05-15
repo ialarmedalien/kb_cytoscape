@@ -15,8 +15,7 @@ say 'environment: ' . Dumper \%ENV;
 require_ok "kb_cytoscape::kb_cytoscapeImpl";
 
 local $| = 1;
-my $token        = $ENV{ 'KB_AUTH_TOKEN' };
-my $config_file  = $ENV{ 'KB_DEPLOYMENT_CONFIG' };
+ewewmy $config_file  = $ENV{ 'KB_DEPLOYMENT_CONFIG' };
 my $callback_url = $ENV{ 'SDK_CALLBACK_URL' };
 
 my $config       = Config::Simple->new( $config_file )->get_block( 'kb_cytoscape' );
@@ -27,7 +26,7 @@ my $scratch      = $config->{ scratch };
 my $auth_token   = Bio::KBase::AuthToken->new(
     token           => $token,
     ignore_authrc   => 1,
-    auth_svc        => $config->{ 'auth-service-url' }
+    auth_svc        => $config->{ 'auth-service-url' },
 );
 
 my $ctx     = Bio::KBase::LocalCallContext->new( $token, $auth_token->user_id );
