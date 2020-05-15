@@ -8,6 +8,9 @@ use Time::HiRes qw(time);
 use Bio::KBase::AuthToken;
 use Bio::KBase::LocalCallContext;
 use installed_clients::WorkspaceClient;
+use Data::Dumper::Concise;
+
+say 'environment: ' . Dumper \%ENV;
 
 require_ok "kb_cytoscape::kb_cytoscapeImpl";
 
@@ -62,11 +65,11 @@ subtest 'creating the new kb_cytoscapeImpl object' => sub {
 
 
 # tests that should be run on CI
-if ( $ENV{ KB_SDK_ACTIVE } ) {
+if ( $ENV{ KB_SDK_TEST } ) {
 
     subtest 'tests requiring kb-sdk' => sub {
 
-        is $ENV{ KB_SDK_ACTIVE }, 1, 'kb-sdk is active';
+        is $ENV{ KB_SDK_TEST }, 1, 'kb-sdk is active';
 
     };
 
@@ -122,17 +125,10 @@ subtest 'testing run_kb_cytoscape' => sub {
                 handle      => re('.*?'),
                 label       => '',
             }, {
-                # data directory
+                # JSON file
                 URL         => re('https:.*?\.kbase\.us.+'),
-                name        => 'data',
-                description => 'cytoscape data dir',
-                handle      => re('.*?'),
-                label       => '',
-            }, {
-                # data directory
-                URL         => re('https:.*?\.kbase\.us.+'),
-                name        => 'package.json',
-                description => 'package file',
+                name        => 'djornl_dataset.json',
+                description => 'dataset JSON file',
                 handle      => re('.*?'),
                 label       => '',
             }

@@ -28,6 +28,7 @@ use File::Copy;
 use Bio::KBase::AuthToken;
 use Bio::KBase::Templater qw( render_template );
 use installed_clients::KBaseReportClient;
+use installed_clients::WorkspaceClient;
 use Config::IniFiles;
 
 #END_HEADER
@@ -39,13 +40,23 @@ sub new {
 
     #BEGIN_CONSTRUCTOR
 
-    my $config_file         = $ENV{ KB_DEPLOYMENT_CONFIG };
-    my $cfg                 = Config::IniFiles->new( -file => $config_file );
+    my $config_file = $ENV{ 'KB_DEPLOYMENT_CONFIG' };
+    my $cfg         = Config::IniFiles->new( -file => $config_file );
 
-    $self->{ scratch }      = $cfg->val( 'kb_cytoscape', 'scratch' );
+    my $auth_token  = Bio::KBase::AuthToken->new(
+        token           => $ENV{ 'KB_AUTH_TOKEN' },
+        ignore_authrc   => 1,
+        auth_svc        => $cfg->val( 'kb_cytoscape', 'auth-service-url' }
+    );
+
     $self->{ appdir }       = $cfg->val( 'kb_cytoscape', 'appdir' );
+    $self->{ scratch }      = $cfg->val( 'kb_cytoscape', 'scratch' );
+    $self->{ ws_url }       = $cfg->val( 'kb_cytoscape', 'workspace-url' };
     $self->{ callbackURL }  = $ENV{ SDK_CALLBACK_URL };
 
+    $self->{ ws_client }    = installed_clients::WorkspaceClient->new(
+        $self->{ ws_url }, token => $token,
+    );
 
     #END_CONSTRUCTOR
 
@@ -131,8 +142,8 @@ sub run_kb_cytoscape {
 
     my $data_dir = catdir( $self->{ appdir }, 'data' );
     copy(
-        catfile( $self->{ appdir }, 'package.json' ),
-        catfile( $self->{ scratch }, 'package.json' )
+        catfile( $data_dir, 'djornl_dataset.json' ),
+        catfile( $self->{ scratch }, 'djornl_dataset.json' )
     );
 
     my $report = $kb_report_client->create_extended_report( {
@@ -144,14 +155,9 @@ sub run_kb_cytoscape {
                 description => 'Cytoscape graph viewer',
 
             }, {
-                # data directory
-                path        => $data_dir,
-                name        => 'data',
-                description => 'cytoscape data dir',
-            }, {
-                path        => catfile( $self->{ scratch }, 'package.json' ),
-                name        => 'package.json',
-                description => 'package file',
+                path        => catfile( $self->{ scratch }, 'djornl_dataset.json' ),
+                name        => 'djornl_dataset.json',
+                description => 'dataset JSON file',
             }
         ],
         direct_html_link_index  => 0,
