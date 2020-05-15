@@ -30,7 +30,7 @@ use Bio::KBase::Templater qw( render_template );
 use installed_clients::KBaseReportClient;
 use installed_clients::WorkspaceClient;
 use Config::IniFiles;
-
+use Data::UUID;
 #END_HEADER
 
 sub new {
@@ -131,7 +131,10 @@ sub run_kb_cytoscape {
     my $kb_report_client = installed_clients::KBaseReportClient->new( $self->{ callbackURL } );
 
     # create the cytoscape report
-    my $cytoscape_path = catfile( $self->{ scratch }, 'cytoscape.html' );
+    my $uuid = Data::UUID->new->create->to_string;
+    mkdir( catdir( $self->{ scratch }, $uuid ) );
+    my $cytoscape_path = catfile( $self->{ scratch }, $uuid, 'cytoscape.html' );
+
 
     render_template(
         catfile( $self->{ appdir }, 'views', 'cytoscape.tt' ),
@@ -142,21 +145,16 @@ sub run_kb_cytoscape {
     my $data_dir = catdir( $self->{ appdir }, 'data' );
     copy(
         catfile( $data_dir, 'djornl_dataset.json' ),
-        catfile( $self->{ scratch }, 'djornl_dataset.json' )
+        catfile( $self->{ scratch }, $uuid, 'djornl_dataset.json' )
     );
 
     my $report = $kb_report_client->create_extended_report( {
         workspace_name => $params->{ workspace_name },
         html_links      => [
             {
-                name        => 'cytoscape.html',
-                path        => $cytoscape_path,
+                name        => 'cytoscape',
+                path        => catdir( $self->{ scratch }, $uuid ),
                 description => 'Cytoscape graph viewer',
-
-            }, {
-                path        => catfile( $self->{ scratch }, 'djornl_dataset.json' ),
-                name        => 'djornl_dataset.json',
-                description => 'dataset JSON file',
             }
         ],
         direct_html_link_index  => 0,

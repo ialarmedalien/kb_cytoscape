@@ -20,3 +20,4 @@ requires 'Test::Most', '>= 0.35';
 requires 'Test::Output', '>= 1.031';
 requires 'Test::Perl::Critic', '>= 1.04';
 requires 'Try::Tiny', '>= 0.30';
+requires 'Data::UUID', '>= 1.226';

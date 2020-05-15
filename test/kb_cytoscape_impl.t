@@ -120,15 +120,8 @@ subtest 'testing run_kb_cytoscape' => sub {
         'html_links'    => [
             {
                 URL         => re('https:.*?\.kbase\.us.+'),
-                name        => 'cytoscape.html',
+                name        => 'cytoscape',
                 description => 'Cytoscape graph viewer',
-                handle      => re('.*?'),
-                label       => '',
-            }, {
-                # JSON file
-                URL         => re('https:.*?\.kbase\.us.+'),
-                name        => 'djornl_dataset.json',
-                description => 'dataset JSON file',
                 handle      => re('.*?'),
                 label       => '',
             }

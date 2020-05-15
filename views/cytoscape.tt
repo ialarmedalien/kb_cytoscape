@@ -1,8 +1,6 @@
 [%
     scr_arr = [
       'https://d3js.org/d3-fetch.v1.min.js',
-    #  'https://d3js.org/d3.v5.min.js',
-    #  'https://unpkg.com/dc@4/dist/dc.js',
       'https://cdnjs.cloudflare.com/ajax/libs/crossfilter2/1.5.2/crossfilter.min.js',
       'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.14.1/cytoscape.min.js',
     ]
@@ -31,7 +29,30 @@
         <div id="cy" style="height: 1000px" class="col-md-10"></div>
         <div id="controls" class="col-md-2">
           <h2>Data</h2>
-          <div class="form-group" id="dataset--div"></div>
+          <div class="form-group" id="dataset--div">
+[%
+    data_sources = {
+      'pheno_assn' => 'GWAS associations produced by analyzing a subset of phenotypes and SNPs in the Arabidopsis 1001 Genomes database (13,918 nodes, 40864 edges; phenotype data)',
+      'domain_co_occur' => 'protein domain co-occurrence values from the Arabidopsis AraNetv2 database (7634 nodes, 25000 edges)',
+      'gene_coexpr' => 'pairwise gene coexpression values from the Arabidopsis AraNetv2 database (10,307 nodes, 50095 edges)',
+      'ppi_liter' => 'protein-protein interaction values from literature-curated small- to medium-scale experimental data; from the Arabidopsis AraNetv2 database (2709 nodes, 5168 edges)',
+      'ppi_hithru' => 'protein-protein interaction values derived from four high-throughput PPI screening experiments; from the Arabidopsis AraNetv2 database (4216 nodes, 8000 edges)',
+    };
+          FOR src IN data_sources.keys; %]
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" value="[% src %]" name="dataset" />
+                [% data_sources.$src %]
+              </label>
+            </div>
+[%        END %]
+
+          </div>
+          <div class="form-group">
+            <button id="dataset--button" class="btn dataset--button">
+              Load datasets into graph
+            </button>
+          </div>
           <h2>Layout</h2>
           <div class="form-group" id="layout--div"></div>
           <div class="form-group" id="layout_fit--div">
@@ -58,12 +79,18 @@
           </div>
           <div class="form-group">
             <!-- If enabled along with panning, the user must hold down one of shift, control, alt, or command to initiate box selection. -->
-            <button id="select_box--button" class="btn">
+            <button id="select_box--button" class="btn" data-toggle="button" aria-pressed="false" type="button">
               Toggle box selection
             </button>
-            <button id="select_multiple--button" class="btn">
+            <button id="select_multiple--button" class="btn" data-toggle="button" aria-pressed="false" type="button">
               Toggle multiple selection
             </button>
+          </div>
+          <h2>Filtering</h2>
+          <div class="form-group">
+            <label for="filter_degree--range">Filter by degree</label>
+            <input type="range" id="filter_degree--range" name="filter_degree" min="0" max="11">
+            <button id="filter_degree--button" class="btn">Filter!</button>
           </div>
           <ul>
             <li>get neighbourhood of selected nodes</li>
@@ -92,7 +119,7 @@
   "use strict";
 
   function renderGraph(element_id, node_arr, edge_arr) {
-    const graph = cytoscape({
+    return cytoscape({
       container: document.getElementById(element_id), // container to render in
       elements: {
         nodes: node_arr,
@@ -138,7 +165,6 @@
         }
       ],
     })
-    return graph
   }
 
 
@@ -315,90 +341,87 @@
       minTemp: 1.0
     }
   },
-  dir = '/static/cytoscape/',
-  json_files = {
-    'djornl_tiny.json': 'Cut-down version of the literature dataset',
-    'djornl_pheno_assn.json': 'GWAS associations produced by analyzing a subset of phenotypes and SNPs in the Arabidopsis 1001 Genomes database (13,918 nodes, 40864 edges; phenotype data)',
-    'djornl_domain_co_occur.json': 'protein domain co-occurrence values from the Arabidopsis AraNetv2 database (7634 nodes, 25000 edges)',
-    'djornl_gene_coexpr.json': 'pairwise gene coexpression values from the Arabidopsis AraNetv2 database (10,307 nodes, 50095 edges)',
-    'djornl_ppi_liter.json': 'protein-protein interaction values from literature-curated small- to medium-scale experimental data; from the Arabidopsis AraNetv2 database (2709 nodes, 5168 edges)',
-    'djornl_ppi_hithru.json': 'protein-protein interaction values derived from four high-throughput PPI screening experiments; from the Arabidopsis AraNetv2 database (4216 nodes, 8000 edges)',
-  },
-  gene_data = 'djornl_gene.json',
-  pheno_data = 'djornl_phenotype.json',
   graph_el_id = 'cy'
 
   addLayoutSelector(layouts)
-  addDatasetSelector(json_files)
+  addDatasetSelector()
 
-  function load_dataset(file_name) {
-    let files_to_load = [file_name, gene_data]
-    if (file_name.indexOf('pheno') !== -1) {
-      // load both phenotype and gene info
-      files_to_load.push(pheno_data)
+  function loadDataset(datasets) {
+    if (datasets.length < 1) {
+      return
     }
-    let promises = files_to_load.map(d => d3.json(dir + d))
-
-    Promise.all(promises)
+    // datasets is an array of edge type names
+    d3.json('/static/cytoscape/data/djornl_dataset.json')
     .then(all_file_data =>  {
+      // keys are assocs, genes, pheno
       let data = {
         nodes: {},
         edges: {},
         node_data: {},
         genes: {},
       }
-      // do we have phenotype data?
-      const pheno_data = all_file_data.length === 3 ? 1 : 0
 
-      all_file_data[0].forEach(d => {
-        // the first file keys:
-        // _from, _to, lls, _key, _id
-        const obj = {
-          source: d._from,
-          target: d._to,
-          edge: d.lls,
-          id: d._key,
-        }
-
-        const node_list = ['_from', '_to']
-
-        node_list.forEach( n => {
-          if (data.nodes[d[n]]) {
-            data.nodes[d[n]].push(obj)
+      all_file_data['assocs'].forEach(d => {
+        if ( datasets.indexOf(d.type) !== -1) {
+          data.edges[d.id] = {
+            id: d.id,
+            source: d.from,
+            target: d.to,
+            type: d.type,
+            score: d.score,
           }
-          else {
-            data.nodes[d[n]] = [obj]
-          }
-        })
-        data.edges[obj.id] = obj
-      })
-
-      const pheno_fields = ["pheno_aragwas_id", "pheno_ref", "pheno_desc1", "pheno_desc2", "pheno_desc3"]
-      // second file: gene data
-      all_file_data[1].forEach(d => {
-        // normalise the accessor
-        d.id = d._id
-        if (data.nodes[d.id]) {
-          data.node_data[d.id] = d
+          const node_list = ['from', 'to']
+          node_list.forEach( n => {
+            data.nodes[d[n]] ? data.nodes[d[n]]++ : data.nodes[d[n]] = 1
+          })
         }
       })
 
-      if (all_file_data[2]) {
-        // phenotype data
-        data['pheno'] = {}
-        all_file_data[2].forEach(d => {
-          d.id = d._id
-          data.pheno[d._id] = d
-          data.node_data[d._id] = d
+      // pheno and gene data
+      const data_types = ['genes', 'phenotypes']
+      data_types.forEach( type => {
+        all_file_data[ type ].forEach( d => {
+          if (data.nodes[d.id]) {
+            data.node_data[d.id] = d
+          }
         })
-      }
+      })
+
+      // ensure that all nodes are present in node_data
+      Object.keys(data.nodes).forEach( n => {
+        if (! data.node_data[n]) {
+          console.log('no node data for ' + n)
+        }
+      })
       window.data = data
 
-      data.node_arr = Object.keys(data.nodes).map(el => { return { data: { id: data.node_data[el]._id } } } )
+      data.node_arr = Object.keys(data.nodes).map(el => {
+        return { data: { id: el } }
+      } )
       data.edge_arr = Object.keys(data.edges).map(el => { return { data: data.edges[el] } } )
 
       console.log('Found ' + data.node_arr.length + ' nodes and ' + data.edge_arr.length + ' edges')
       const cy = renderGraph('cy', data.node_arr, data.edge_arr)
+      window.cy = cy
+
+      let nMin = 999999, nMax = 0
+      cy.nodes().forEach( n => {
+        let node_id = n.id()
+        data.node_data[ n.id() ]['degree'] = n.degree()
+        if (data.node_data[ n.id() ].node_type === 'pheno') {
+          n.addClass('phenotype')
+        }
+        if (n.degree() > nMax) {
+          nMax = n.degree()
+        }
+        if (n.degree() < nMin) {
+          nMin = n.degree()
+        }
+      })
+      $('#filter_degree--range').attr({
+        min: nMin,
+        max: nMax,
+      })
 
       let collection = cy.collection()
       cy.nodes().on('click', function(e){
@@ -409,23 +432,7 @@
           console.log(data.node_data[node.id()])
         }
       })
-
-      cy.nodes().forEach( n => {
-        let node_id = n.data()['id']
-        data.node_data[ node_id ]['degree'] = n.degree()
-        n.data(data.node_data[ node_id ])
-        if (pheno_data) {
-          if (data.pheno[ node_id ]) {
-            // this is a phenotype
-            n.data({
-              type: 'phenotype'
-            })
-            n.addClass('phenotype')
-          }
-        }
-      })
-
-      $('#layout--select').change( (eventData,handler) => {
+      $('#layout--select').change( () => {
         const value = $('#layout--select').val()
         const layout = cy.layout( layouts[value] )
         layout.run()
@@ -440,42 +447,38 @@
           : e.select()
         )
       } )
+      $('#export_json--button').click( () => { console.log(cy.json()) } )
       $('#select_multi--button').click( () => { cy.selectionType() === 'single'
         ? cy.selectionType('additive')
         : cy.selectionType('single')
       } )
       $('#select_box--button').click( () => { cy.boxSelectionEnabled( !cy.boxSelectionEnabled() ) } )
-      window.cy = cy
+      $('#filter_degree--button').click( () => {
+          const value = $('#filter_degree--range').val()
+          cy.remove(cy.filter( e => e.isNode() && e.degree() > value))
+          let nMin = 999999, nMax = 0
+          cy.nodes().forEach( n => {
+            let d = n.degree()
+            if (d > nMax) {
+              nMax = d
+            }
+            if (d < nMin) {
+              nMin = d
+            }
+          })
+          // reset the slider values
+          $('#filter_degree--range').attr({
+            min: nMin,
+            max: nMax,
+          })
+        })
     })
   }
 
-
-//           > First Neighbors of Selected Nodes
-//           > Select nodes from ID list
-//           > Select nodes by edge metadata/properties
-//           > Invert selection
-//           > Select by mouse
-
-  function addDatasetSelector(json_files) {
-    // insert an options element with each of the layouts above
-    const dataset_arr = Object.keys(json_files).map( (f,i) => {
-      return '<option value="' + f + '"'
-      //  + ( i ? '' : ' selected' )
-        + '>' + json_files[f] + '</option>'
-    }),
-    dataset_str = '<select id="dataset--select" class="form-control" name="dataset">'
-      + '<option selected>Select a data set to view</option>'
-      + dataset_arr.join('\n')
-      + '</select>'
-    $('#dataset--div').append(dataset_str)
-    $('#dataset--select').change( (eventData, handler) => {
-      const value = $('#dataset--select').val()
-      if (value) {
-        load_dataset(value)
-      }
-      else {
-        // remove the graph?
-      }
+  function addDatasetSelector() {
+    $('#dataset--button').click( () => {
+      const datasets = $('input[name=dataset]:checked').map( (i,e) => { return e.value }).get()
+      loadDataset(datasets)
     })
   }
 
@@ -493,5 +496,4 @@
 </script>
 [%
     END; # end wrapper
-
 %]
