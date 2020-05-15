@@ -120,7 +120,7 @@ subtest 'testing run_kb_cytoscape' => sub {
         'html_links'    => [
             {
                 URL         => re('https:.*?\.kbase\.us.+'),
-                name        => 'cytoscape',
+                name        => 'cytoscape.html',
                 description => 'Cytoscape graph viewer',
                 handle      => re('.*?'),
                 label       => '',

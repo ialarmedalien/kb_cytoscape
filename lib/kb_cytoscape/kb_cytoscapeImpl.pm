@@ -153,7 +153,7 @@ sub run_kb_cytoscape {
         workspace_name => $params->{ workspace_name },
         html_links      => [
             {
-                name        => 'cytoscape',
+                name        => 'cytoscape.html',
                 path        => catdir( $self->{ scratch }, $uuid ),
                 description => 'Cytoscape graph viewer',
             }
