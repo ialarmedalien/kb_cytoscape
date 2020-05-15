@@ -131,7 +131,8 @@ sub run_kb_cytoscape {
     my $kb_report_client = installed_clients::KBaseReportClient->new( $self->{ callbackURL } );
 
     # create the cytoscape report
-    my $uuid = Data::UUID->new->create->to_string;
+    my $uuid_gen = Data::UUID->new;
+    my $uuid = $uuid_gen->create_str;
     mkdir( catdir( $self->{ scratch }, $uuid ) );
     my $cytoscape_path = catfile( $self->{ scratch }, $uuid, 'cytoscape.html' );
 
