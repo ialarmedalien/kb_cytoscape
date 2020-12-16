@@ -1,17 +1,18 @@
 [%
   BLOCK render_th_row %]
   <tr>
-[%    FOR th IN headers.enum; %]
-  <th class='[% data_table.class %]__th--[% th %]'>[%
-        IF headers.enum_map.$th;
-          headers.enum_map.$th;
-        ELSE;
-          th;
-        END; %]</th>
-[%    END; %]
+[%  FOR th IN headers.enum; %]
+    <th class='[% data_table.class %]__th--[% th %]'>[%
+      IF headers.enum_map.$th;
+        headers.enum_map.$th;
+      ELSE;
+        th;
+      END; %]</th>
+[%  END; %]
   </tr>
 [%
   END; # BLOCK render_th_row
+
 
 # A generic table component
 # params:
@@ -25,9 +26,6 @@
 # .transform      => hashref of functions to transform an object value for display
 #                 (e.g. to create a link with a certain value, modify text, etc.)
 # .n_rows         => maximum number of rows to display initially
-
-#  PROCESS 'inc/generic/labels.tt';
-
 
   IF ! data_table.class;
     data_table.class = 'dataTable';

@@ -1,0 +1,57 @@
+module_name: kb_cytoscape
+service_language: perl
+description: A KBase module to allow graph visualisation with Cytoscape.
+
+owners:
+  - id: ialarmedalien
+    email: aireland@lbl.gov
+
+authors:
+  - id: ialarmedalien
+    email: aireland@lbl.gov
+
+methods:
+  - method_name: run_kb_cytoscape
+
+    human_method_name: Run KB Cytoscape
+
+    description: <p>This tool provides an interface to the KBase Arabidopsis datasets supplied by the Jacobson lab at Oak Ridge National Lab. Users can perform a simple query to retrieve an initial dataset of interest, and then use the report produced to further examine their data. Data is provided as a set of nodes and edges, where nodes are gene or phenotype data, and the edges represent connections between them. Insert some more content here!</p>
+
+    categories:
+      - active
+      - demo
+
+    # input parameters for the method
+    # note that any parameters from the stored queries will be added to this set
+    parameters:
+      input:
+        workspace_id:
+          type: string
+          mapping: narrative_system_variable
+        dry_run:
+          type: int
+          mapping: input_parameter
+          display:
+            ui-name: Dry run
+            short-hint: Perform a dry run by parsing params but not fetching data
+          spec:
+            id: dry_run
+            advanced: false
+            default_values: [0]
+            field_type: dropdown
+            optional: false
+            dropdown_options:
+              options:
+                - display: false
+                  value: 0
+                - display: true
+                  value: 1
+
+      # output parameters
+      output:
+        report_name:
+          type: string
+        report_ref:
+          type: string
+        query_params:
+          type: string

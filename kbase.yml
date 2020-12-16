@@ -1,15 +1,7 @@
-module-name:
-    kb_cytoscape
-
-module-description:
-    A KBase module to allow graph visualisation with Cytoscape.
-
-service-language:
-    perl
-
-module-version:
-    0.0.1
-
+---
+module-description: A KBase module to allow graph visualisation with Cytoscape.
+module-name: kb_cytoscape
+module-version: 0.0.1
 owners:
-    [ialarmedalien]
-
+- ialarmedalien
+service-language: perl

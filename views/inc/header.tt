@@ -1,37 +1,76 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/fh-3.1.6/r-2.2.3/sc-2.0.1/datatables.min.css"/>
-  <link rel="stylesheet" type="text/css" href="/narrative/static/css/style.min.css" />
-  <link rel="stylesheet" type="text/css" href="/narrative/static/kbase/css/kbaseStylesheet.css" />
-  <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/fh-3.1.6/r-2.2.3/sc-2.0.1/datatables.min.js"></script>
-[% IF file_format && ( file_format == 'csv' || file_format == 'tsv' )
-    || include_dsv_parser %]
-<script src="https://d3js.org/d3-dsv.v1.min.js"></script>
-<script src="https://d3js.org/d3-fetch.v1.min.js"></script>
-[% END %]
+[% IF include_datatables %]
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-colvis-1.6.2/b-html5-1.6.2/b-print-1.6.2/cr-1.5.2/fh-3.1.7/sc-2.0.2/sp-1.1.0/sl-1.3.1/datatables.min.css"/>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-colvis-1.6.2/b-html5-1.6.2/b-print-1.6.2/cr-1.5.2/fh-3.1.7/sc-2.0.2/sp-1.1.0/sl-1.3.1/datatables.min.js"></script>
+[%  ELSE;
+    # add in Bootstrap css + js %]
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+[%  END;
+
+    # load any styles
+    IF style_arr;
+      FOREACH s IN style_arr; %]
+
+  <link rel="stylesheet" type="text/css" href="[% s %]">
+[%    END;
+    END; %]
+  <link rel="stylesheet" type="text/css" href="/narrative/static/style/style.min.css">
+  <link rel="stylesheet" type="text/css" href="/narrative/static/kbase/css/kbaseStylesheet.css">
+[%
+    # if there's a data file format specified or we should load the dsv parser,
+    # ensure it is in the script array
+
+    IF data_file_format && ( data_file_format == 'csv' || data_file_format == 'tsv' )
+     || include_dsv_parser;
+      IF ! script_arr;
+        script_arr = [];
+      END;
+      script_arr.push(
+        'https://d3js.org/d3-dsv.v1.min.js', 'https://d3js.org/d3-fetch.v1.min.js'
+      );
+    END;
+
+    # load any other scripts
+    IF script_arr;
+      FOREACH s IN script_arr; %]
+  <script type="text/javascript" src="[% s %]"></script>
+[%
+      END;
+    END;
+%]
 <style>
-    .kb-html-report {
-        padding: 0 2rem;
-    }
-    .kb-html-report > .panel {
-        border-width: 0;
-    }
-    .kb-html-report .nav.nav-tabs {
-        margin: 0 -2rem 1rem;
-        padding-left: 2rem;
-    }
-    .progress-bar-null {
-        background-color: #efefef;
-    }
+.kb-html-report {
+    padding: 0 2rem;
+}
+.kb-html-report > .panel {
+    border-width: 0;
+}
+.kb-html-report .nav.nav-tabs {
+    margin: 0 -2rem 1rem;
+    padding-left: 2rem;
+}
+.progress-bar-null {
+    background-color: #efefef;
+}
 .tabular {
   overflow: hidden;
   z-index: 1;
-  position: relative; }
+  position: relative;
+}
 
 .tabular dl, .tabular dt, .tabular dd {
   margin: 0;
   padding: 0;
-  position: relative; }
+  position: relative;
+}
 
 .tabular dt, .tabular dd {
   display: inline-block;
@@ -39,16 +78,20 @@
   padding: 12px 2%;
   padding: 0.75rem 2%;
   position: relative;
-  border-top: 1px solid #ccc; }
+  border-top: 1px solid #ccc;
+}
 
 .tabular dt {
-  width: 29%; }
+  width: 29%;
+}
 
 .tabular dd {
-  width: 69%; }
+  width: 69%;
+}
 
 .tabular dd + dd {
-  border-top-color: #fff; }
+  border-top-color: #fff;
+}
 
 .tabular dt:after, .tabular dd:after {
   content: " ";
@@ -58,9 +101,15 @@
   top: -2px;
   bottom: 0;
   right: -999em;
-  z-index: -1; }
+  z-index: -1;
+}
 
 .tabular dd + dd {
-  margin-left: 30%; }
+  margin-left: 30%;
+}
+[% IF inline_style_statements %]
 
+[%  inline_style_statements %]
+
+[% END %]
 </style>

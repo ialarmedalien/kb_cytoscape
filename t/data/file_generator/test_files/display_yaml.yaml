@@ -1,0 +1,28 @@
+---
+description: A long description of all the cool things that this method does.
+icon: icon.png
+name: Run yet another KBase method
+parameters:
+  cluster_ids:
+    long-hint: Fetch all nodes that are members of the specified cluster(s), and the
+      edges and nodes within the specified distance (number of hops) of those nodes.
+    short-hint: Fetch nodes by cluster ID, in the form "clustering_system_name:cluster_id".
+      Enter each ID on a new line.
+    ui-name: Cluster IDs
+  distance:
+    short-hint: Number of hops to find neighbors and neighbors-of-neighbors
+    ui-name: Traversal Distance
+  edge_types:
+    short-hint: Edge types to filter on
+    ui-name: Edge Types
+  search_text:
+    long-hint: Search for nodes using a simple fuzzy search on node metadata; return
+      the matching nodes, and the edges and nodes within the specified distance (number
+      of hops) of those nodes.
+    short-hint: Search nodes and their metadata for the search string
+    ui-name: Search text
+  zero_or_one:
+    short-hint: Is this zero or is it one?
+    ui-name: Zero or one?
+screenshots: []
+tooltip: Run yet another KBase method!

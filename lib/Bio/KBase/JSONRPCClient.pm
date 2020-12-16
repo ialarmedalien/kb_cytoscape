@@ -1,12 +1,16 @@
 package Bio::KBase::JSONRPCClient;
+
 use strict;
 use warnings;
+use feature qw( say );
+use Data::Dumper::Concise;
+
 use parent 'JSON::RPC::Client';
 use Carp qw( croak );
 use Ref::Util qw( is_hashref );
 use JSON::MaybeXS;
 use LWP::UserAgent;
-use Bio::KBase::Logger qw( get_logger );
+# use Bio::KBase::Logger qw( get_logger );
 
 #
 # Override JSON::RPC::Client::call because it doesn't handle error returns properly.
@@ -21,34 +25,31 @@ sub new {
         timeout => 10,
     );
 
-#     my $logger = get_logger();
-#
-#     $ua->add_handler( request_prepare => sub {
-#         my $request = shift;
-#
-#         $logger->debug( message => {
-#             event   => 'JSONRPC_request_send',
-#             request => {
-#                 method  => $request->method,
-#                 uri     => $request->uri,
-#                 headers => { $request->headers->flatten },
-#                 content => $request->content,
-#             }
-#         } );
-#     } );
-#
-#     $ua->add_handler( response_done => sub {
-#         my $response = shift;
-#
-#         $logger->debug( message => {
-#             event       => 'JSONRPC_response_done',
-#             response    => {
-#                 code    => $response->code,
-#                 headers => { $response->headers->flatten },
-#             },
-#         } );
-#         $logger->trace( content => $response->decoded_content ) if $logger->is_trace;
-#     } );
+    $ua->add_handler( request_prepare => sub {
+        my $request = shift;
+
+        say Dumper {
+            event   => 'JSONRPC_request_send',
+            request => {
+                method  => $request->method,
+                uri     => $request->uri,
+                headers => { $request->headers->flatten },
+                content => $request->content,
+            }
+        };
+    } );
+
+    $ua->add_handler( response_done => sub {
+        my $response = shift;
+
+        say Dumper {
+            event       => 'JSONRPC_response_done',
+            response    => {
+                code    => $response->code,
+                headers => { $response->headers->flatten },
+            },
+        };
+    } );
 
     $self->ua( $ua );
     $self->json( $proto->create_json_coder );
@@ -67,7 +68,7 @@ sub call {
         $response = $self->_get( $uri );
     }
     else {
-        croak "object is not a hashref; it is a " . ( ref( $obj ) || 'SCALAR' )
+        croak "object is not a hashref; it is a " . ( ref $obj || 'SCALAR' )
             unless is_hashref $obj;
         $response = $self->_post( $uri, $headers, $obj );
     }

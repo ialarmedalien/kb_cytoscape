@@ -1,0 +1,39 @@
+# Line
+-l=78           # Max line width is 78 cols
+-ole=unix       # Unix line endings
+
+# Indentation
+-i=4            # Indent level is 4 cols
+-ci=4           # Continuation indent is 4 cols
+-dt=4           # Default tab size is 4 cols
+-noll           # Don't outdent long quoted strings or lines
+
+# Comments
+-iscl           # Ignore inline comment (side comments) length
+
+# Blank lines
+-blbs=1         # Ensure a blank line before methods
+-bbb            # Ensure a blank line before blocks
+-mbl=1          # Maximum consecutive blank lines
+
+# Braces/parens/brackets
+-nbl            # Opening braces on same line (incl. methods)
+-pt=0           # Low parenthesis tightness
+-sbt=0          # Low square bracket tightness
+-bt=0           # Low brace tightness
+-bbt=0          # Low block brace tightness
+
+# Semicolons
+-nsfs           # No space for semicolons within for loops
+-nsts           # No space before terminating semicolons
+
+# Spaces / Tightness
+-baao           # Break after all operators
+-bbao           # Break before all operators
+-cti=0          # No extra indentation for closing brackets
+
+# General perltidy settings 
+-fnl            # Don't add line breaks unnecessarily
+-conv           # Use as many iterations as necessary to beautify, until successive runs produce identical output (converge)
+-b              # Backup files and modify in-place
+-se             # Errors to STDERR

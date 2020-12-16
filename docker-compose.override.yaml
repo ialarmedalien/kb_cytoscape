@@ -1,0 +1,63 @@
+version: '3'
+
+# This docker-compose is for development and testing
+# It does not reflect the set up used in production
+
+volumes:
+  shared:
+
+services:
+
+  # For running the Flask server and tests
+  re_api:
+    build:
+      context: ${PWD}/relation_engine
+      dockerfile: ${PWD}/relation_engine/Dockerfile
+    # uncomment to mount local directories
+    volumes:
+      - ${PWD}/relation_engine:/app
+      - ${PWD}/relation_engine/spec:/spec
+      - ${PWD}/shared:/shared
+      - ${PWD}/scripts/start_re_server_load_data.sh:/app/scripts/start_re_server_load_data.sh
+      - ${PWD}/exascale_data:/app/exascale_data
+    environment:
+      - RES_ROOT_DATA_PATH=/app/spec/test/djornl/test_data
+      - DB_DATALOAD_DONE=/shared/db_done
+    command: ["sh", "-x", "/app/scripts/start_re_server_load_data.sh"]
+
+  # A mock kbase auth server (see relation_engine_server/test/mock_auth/*.json)
+  auth:
+    volumes:
+      - ${PWD}/relation_engine/relation_engine_server/test/mock_auth:/config
+
+  # Mock workspace server (see relation_engine_server/test/mock_workspace/*.json)
+  workspace:
+    volumes:
+      - ${PWD}/relation_engine/relation_engine_server/test/mock_workspace:/config
+
+#  kb_cytoscape perl container
+  perl:
+    build:
+      context: ${PWD}
+      dockerfile: ${PWD}/Dockerfile
+    depends_on:
+      - re_api
+    volumes:
+      - ${PWD}:/kb/module
+      - ${PWD}/test_local/workdir:/kb/module/work
+      - ${PWD}/shared:/shared
+    environment:
+      - DB_URL=http://arangodb:8529
+      - DB_USER=root
+      - RE_API_URL=http://127.0.0.1:5000
+      - KBASE_ENDPOINT=https://ci.kbase.us
+      - DB_DATALOAD_DONE=/shared/db_done
+      - DOCKER_COMPOSE_ENV=1
+
+#  callback server
+#  callback:
+#    build:
+#      dockerfile: ${PWD}/CallbackServer_Dockerfile
+#
+#
+

@@ -1,0 +1,15 @@
+[kb_cytoscape]
+kbase-endpoint = {{ kbase_endpoint }}
+job-service-url = {{ job_service_url }}
+workspace-url = {{ workspace_url }}
+shock-url = {{ shock_url }}
+handle-service-url = {{ handle_url }}
+srv-wiz-url = {{ srv_wiz_url }}
+njsw-url = {{ njsw_url }}
+auth-service-url = {{ auth_service_url }}
+auth-service-url-allow-insecure = {{ auth_service_url_allow_insecure }}
+appdir = /kb/module
+scratch = /kb/module/work/tmp
+re-spec-base-dir = /kb/module/relation_engine/spec
+re-api-endpoint = https://ci.kbase.us/services/relation_engine_api
+docker-re-api-endpoint = http://re_api:5000

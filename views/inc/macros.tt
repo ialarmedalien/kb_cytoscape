@@ -1,16 +1,42 @@
 [%
-  MACRO tabbed_layout BLOCK;
 
+  # tabbed_layout
+  #
   # Create a tabbed layout using Bootstrap navigation and panels.
-  # Arguments:
+  #
+  # template variables used:
   #
   #   page_title    # general title to go at the top of the page
-  #   page_content  # an array of page items in the form
-  #
-  #   { name => 'Name to put in the tab', name_lc => 'anchor_name' }
-  #
 
-   %]
+  #   page_content  # an array of page items in the form
+  #   { name => 'Name to put in the tab', name_lc => 'anchor_name' }
+
+  #   template_debug_view   # (optional) if present, the template content and
+  #                         # template variables will be displayed
+
+  MACRO tabbed_layout BLOCK;
+
+    IF template_debug_view;
+
+      IF template_content;
+        page_content.push({
+          name    => 'Template View: ' _ template.name,
+          name_lc => 'tmpl_view',
+          rendered_content => '<pre>' _ template_content _ '</pre>',
+        });
+      END;
+
+      IF tmpl_vars;
+        page_content.push({
+          name    => 'Template variables',
+          name_lc => 'tmpl_vars',
+          rendered_content => '<pre>' _ tmpl_vars _ '</pre>',
+        });
+      END;
+
+    END; # end template_debug_view
+
+%]
   <div class="panel panel-default">
     <h1>
       [% page_title %]
@@ -22,7 +48,8 @@
 [%  PROCESS page_item_content page_item = page_content.0; %]
     </div>
 [%
-    ELSE; # tabbed layout for pages with more than one item
+    ELSE;
+    # tabbed layout for pages with more than one item
 %]
     <ul class="nav nav-tabs" role="tablist" id="navigation">
 [%    first = 1;
@@ -55,9 +82,13 @@
   END; # tabbed_layout
 
 
+
+  # page_item_content
+  #
+  # render the content of a piece of page
+
   BLOCK page_item_content;
 
-  # render the content of a piece of page
     IF page_item.content;
       IF page_item.content == 'table';
         PROCESS 'views/inc/table.tt' data_table = page_item.table_config;
@@ -70,17 +101,19 @@
     ELSIF content;
       content;
     ELSE;
-      'what do I display here?';
-      # what now?
+      '<p>Warning: no tab content specified.</p>';
     END;
 
   END; # page_item_content
 
 
 
-  BLOCK tab_pane;
+  # tab_pane
+  #
   # panel suitable for use with nav_item to create a tabbed interface
   # see tabbed_layout to combine the two items
+
+  BLOCK tab_pane;
 
 %]
     <div class="tab-pane [% panel_class %]" role="tabpanel" id="[% item.name_lc %]" aria-labelledby="[% item.name_lc %]-tab">
@@ -90,9 +123,13 @@
   END; # tab_pane
 
 
-  BLOCK nav_item;
+
+  # nav_item
+  #
   # creates a single navigation control, suitable for a tabbed interface
   # see tabbed_layout to create the full layout
+
+  BLOCK nav_item;
 
       selected = 'false';
       IF is_first_item == 1;
@@ -108,25 +145,29 @@
   END; # nav_item
 
 
-  BLOCK image;
+
+  # image
+  #
   # display an image with an optional caption
   #
-  # arguments: image_config object with keys
+  # template variables used:
+  #   image_config object with keys
   #
-  # img_src: "/path/to/image.jpg",
-  # img_alt: "text describing the image"
-  # caption: '<p>This is a caption</p>'  # rendered HTML containing the caption
+  #     img_src: "/path/to/image.jpg",
+  #     img_alt: "text describing the image"
+  #     caption: '<p>This is a caption</p>'  # rendered HTML containing the caption
+
+  BLOCK image;
+
 %]
     <div class="panel panel-default">
-    <img src="[% image_config.img_src %]" class="img-responsive" alt="[% image_config.img_alt %]">
+    <img src="[% config.img_src %]" class="img-responsive" alt="[% config.img_alt %]">
 [%
-    IF image_config.caption;
-      image_config.caption;
+    IF config.caption;
+      config.caption;
     END;
 %]
     </div>
 [%
   END; # end image
-
-
 %]

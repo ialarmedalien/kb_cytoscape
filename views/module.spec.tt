@@ -1,0 +1,47 @@
+/*
+
+[% template_data.module_name %]
+
+*/
+
+module [% template_data.module_name %] {
+
+    typedef structure {
+[%  IF method_data.parameters && method_data.parameters.input;
+        FOR param IN method_data.parameters.input.keys.sort;
+            type = method_data.parameters.input.$param.type;
+%]        [% type %] [% param %];
+[%
+        END;
+    END;
+%]
+[%  FOR param IN template_data.stored_queries.keys.sort;
+        query_data = template_data.stored_queries.$param;
+        type = query_data.type;
+        IF type == 'integer';
+          type = 'int';
+        END;
+%]        [% type %] [% param %];
+[%  END;
+
+%]
+    } [% method_data.method_name %]_input;
+
+    typedef structure {
+[%  IF method_data.parameters && method_data.parameters.output;
+        FOR param IN method_data.parameters.output.keys.sort;
+            type = method_data.parameters.output.$param.type;
+%]        [% type %] [% param %];
+[%
+        END;
+    END;
+%]
+    } [% method_data.method_name %]_output;
+
+    /*
+        [% method_data.method_name %] accepts input in the form specified by [% method_data.method_name %]_input
+        and returns data in the format [% method_data.method_name %]_output
+    */
+    funcdef [% method_data.method_name %]([% method_data.method_name %]_input params) returns ([% method_data.method_name %]_output output) authentication required;
+
+};
