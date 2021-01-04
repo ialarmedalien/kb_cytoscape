@@ -11,12 +11,21 @@
     "url": "git+https://github.com/ialarmedalien/kb_cytoscape.git"
   },
   "keywords": [
-    "cytoscapejs"
+    "cytoscapejs", "kbase", "datatables.js"
   ],
-  "author": "ialarmedalien",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "ialarmedalien",
+      "email" : "aireland@lbl.gov"
+    }
+  ],
+  "license": "See LICENSE file",
   "bugs": {
     "url": "https://github.com/ialarmedalien/kb_cytoscape/issues"
   },
-  "homepage": "https://github.com/ialarmedalien/kb_cytoscape#readme"
+  "homepage": "https://github.com/ialarmedalien/kb_cytoscape#readme",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^7.3.1"
+  }
 }
