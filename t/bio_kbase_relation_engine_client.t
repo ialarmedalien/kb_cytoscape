@@ -49,6 +49,81 @@ subtest 'RE errors' => sub {
         $rec->run_query( { query => 'djornl_search_nodes', params => { 'this' => 'that' } } );
     }   qr{The database API returned an error:.*?Response status: 400}sm,
         'invalid params';
+
+    # make sure that the appropriate checks are done on the returned data
+    no strict 'refs';
+    no warnings 'redefine';
+
+    my $dodgy_returns = [
+        {
+            data    => 'this is not JSON',
+            desc    => 'Invalid JSON',
+            error   => 'The database API returned invalid JSON.',
+        },
+        {
+            data    => '{"this": "that',
+            desc    => 'more invalid JSON',
+            error   => 'The database API returned invalid JSON.',
+        },
+        {
+            data    => encode_json( [ "error" ] ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( {} ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( { "results" => {} } ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( { "results" => [] } ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( { "results" => [ "hello" ] } ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( { "results" => [ [] ] } ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+        {
+            data    => encode_json( { "results" => [ {} ] } ),
+            desc    => 'invalid response structure',
+            error   => 'The database API returned an invalid response',
+        },
+    ];
+
+    for my $test ( @$dodgy_returns ) {
+        local *Bio::KBase::RelationEngine::Client::_build_ua = sub {
+            my $ua = LWP::UserAgent->new;
+            $ua->add_handler( request_send => sub {
+                return HTTP::Response->new(
+                    200,
+                    '',
+                    [ "Content-type" => "application/json" ],
+                    $test->{ data },
+                );
+            } );
+            return $ua;
+        };
+
+        my $rel_engine_client = Bio::KBase::RelationEngine::Client->new;
+
+        my $error = $test->{ error };
+        throws_ok {
+            $rel_engine_client->run_query( { query => 'djornl_fetch_all', params => {} } );
+        } qr{$error}, $test->{ desc } . ": " . $test->{ data };
+    }
+
 };
 
 subtest 'parse_args and run_query' => sub {
@@ -134,11 +209,9 @@ subtest 'parse_args and run_query' => sub {
 sub test_success_response {
     my ( $response, $test, $description ) = @_;
 
-    my $resp_content  = $response->{ content };
-
     my $results = {
-        nodes => [ sort map { $_->{ _key } } @{ $resp_content->{ results }[ 0 ]{ nodes } } ],
-        edges => [ sort map { $_->{ _key } } @{ $resp_content->{ results }[ 0 ]{ edges } } ],
+        nodes => [ sort map { $_->{ _key } } @{ $response->{ query_results }{ nodes } } ],
+        edges => [ sort map { $_->{ _key } } @{ $response->{ query_results }{ edges } } ],
     };
 
     # extract the node and edge _key data from the results

@@ -12,19 +12,6 @@
 #   include_datatables = 1;
   page_title = 'Cytoscape Demo';
 
-  data_sources = {
-    'pheno_assn'      =>
-      'GWAS associations produced by analyzing a subset of phenotypes and SNPs in the Arabidopsis 1001 Genomes database (13,918 nodes, 40864 edges; phenotype data)',
-    'domain_co_occur' =>
-      'protein domain co-occurrence values from the Arabidopsis AraNetv2 database (7634 nodes, 25000 edges)',
-    'gene_coexpr'     =>
-      'pairwise gene coexpression values from the Arabidopsis AraNetv2 database (10,307 nodes, 50095 edges)',
-    'ppi_liter'       =>
-      'protein-protein interaction values from literature-curated small- to medium-scale experimental data; from the Arabidopsis AraNetv2 database (2709 nodes, 5168 edges)',
-    'ppi_hithru'      =>
-      'protein-protein interaction values derived from four high-throughput PPI screening experiments; from the Arabidopsis AraNetv2 database (4216 nodes, 8000 edges)',
-  };
-
   BLOCK inline_style %]
 
 .radio-toggle input[type="radio"] {
@@ -127,18 +114,20 @@
     <div class="container-fluid">
       <div class="row">
         <div class="form-group" id="dataset--div">
-        <p>Select one or more datasets to load and analyse:</p>
-[%    FOR src IN data_sources.keys; %]
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" value="[% src %]" name="dataset" />
-              [% data_sources.$src %]
-            </label>
-          </div>
-[%    END %]
+        <p>Query run: [% query_params.query %]</p>
+        <p>Query params:<p>
+        <pre>
+[%      USE Dumper;
+        Dumper.dump(query_params.params); %]
+        </pre>
+        <p>Results summary:</p>
+        <p>Nodes found: [% results.nodes.size %]</p>
+        <p>Edges found: [% results.edges.size %]</p>
+        <p>Results as JSON: <a href="dataset.json">Results as JSON</a></p>
+        <p>Click the button to load the results:</p>
           <div class="form-group">
             <button id="dataset--button" class="btn dataset--button">
-              Load datasets
+              Load results
             </button>
           </div>
         </div>

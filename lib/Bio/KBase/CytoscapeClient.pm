@@ -105,7 +105,7 @@ Run the query, generate results, and then create a report from the output!
 sub run {
     my ( $self, $params ) = @_;
 
-    die 'Invalid parameter format: parameters must be a hashref' unless is_hashref $params;
+    die 'Invalid parameter format: parameters must be a hashref' unless defined $params && is_hashref $params;
 
     my $workspace_id = delete $params->{ workspace_id }
         or die 'No workspace ID provided: cannot save results';
@@ -120,9 +120,17 @@ sub run {
 
     return $output if $dry_run;
 
+    die 'No results found in response' unless is_hashref $re_output->{ query_results }
+        && %{ $re_output->{ query_results } };
+
     return {
         %$output,
-        %{ $self->prepare_report( $re_output->{ content }, $workspace_id ) },
+        %{  $self->prepare_report(
+                $re_output->{ query_results },
+                $re_output->{ query_params },
+                $workspace_id
+            )
+        },
     };
 }
 
@@ -232,7 +240,9 @@ sub sanitise_and_remap_params {
 
 Collate data that will be used in the cytoscape report, render the template, and then save it as a KBase extended report.
 
-@param {hashref}  $response_data  # content from the query to the RE API
+@param {hashref}  $results        # results of the query to the RE API
+
+@param {hashref}  $query_params   # parameters used for the query, in the form { query => '...', params => { ... } }
 
 @param {string}   $workspace_id   # the all-important workspace ID
 
@@ -241,10 +251,10 @@ Collate data that will be used in the cytoscape report, render the template, and
 =cut
 
 sub prepare_report {
-    my ( $self, $response_data, $workspace_id ) = @_;
+    my ( $self, $results, $query_params, $workspace_id ) = @_;
 
-    $self->create_results_file( $response_data );
-    $self->create_cytoscape_template;
+    $self->create_results_file( $results );
+    $self->create_cytoscape_template( $results, $query_params );
     # $self->create_data_config_file;
     # create the kbase report
     return $self->create_kbase_report( $workspace_id );
@@ -252,24 +262,19 @@ sub prepare_report {
 
 =head2 create_results_file
 
-Save the results from running the relation engine query to a file.
+Save the results from running the relation engine query to a file as JSON.
 
-Dies if the response data does not contain any valid results.
+Dies if the results are not in the expected form, a hashref.
 
-@param {hashref}  $response_data  # content from the query to the RE API
+@param {hashref}  $results  # content from the query to the RE API
 
 =cut
 
 sub create_results_file {
-    my ( $self, $response_data ) = @_;
-
-    # save the contents of $response_data->{ results }
-    die 'No results found in response' unless $response_data->{ results }
-        && is_arrayref $response_data->{ results }
-        && defined $response_data->{ results }[ 0 ];
+    my ( $self, $results ) = @_;
 
     path( $self->run_directory, 'dataset.json' )
-        ->spew_utf8( encode_json $response_data->{ results }[ 0 ] );
+        ->spew_utf8( encode_json $results );
 
     return;
 }
@@ -278,16 +283,24 @@ sub create_results_file {
 
 Render the cytoscape page template.
 
+@param {hashref}  $results        # results of the query to the RE API
+
+@param {hashref}  $query_params   # parameters used for the query, in the form { query => '...', params => { ... } }
+
 =cut
 
 sub create_cytoscape_template {
-    my ( $self ) = @_;
+    my ( $self, $results, $query_params ) = @_;
 
     # create the cytoscape report
     my $template_data = $self->get_report_data;
     render_template(
         $self->cytoscape_template_path->canonpath,
-        { template_data => $template_data },
+        {
+            template_data   => $template_data,
+            query_params    => $query_params,
+            results         => $results,
+        },
         path( $self->run_directory, 'cytoscape.html' )->canonpath,
     );
 }

@@ -91,9 +91,19 @@ sub run_query {
             . "Response content: " . Dumper $json_data;
     }
 
+    # make sure that the results are present and correct
+    die "The database API returned an invalid response.\n"
+        . "Response status: " . $response->code . "\n"
+        . "Response content: " . $response->content . "\n"
+        unless is_hashref $json_data
+            && is_arrayref $json_data->{ results }
+            # the first array entry should be a hashref of { nodes => ..., edges => ...}
+            && is_hashref $json_data->{ results }[ 0 ]
+            && %{ $json_data->{ results }[ 0 ] };
+
     return {
         query_params    => $parsed_params,
-        content         => $json_data,
+        query_results   => $json_data->{ results }[ 0 ],
     };
 }
 

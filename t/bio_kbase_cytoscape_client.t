@@ -87,6 +87,53 @@ subtest 'get report data' => sub {
         or diag explain $data;
 };
 
+subtest '$client->run errors' => sub {
+
+    my $use_docker_re_api = 1;
+    Bio::KBase::Config->_clear_instance();
+    local $ENV{ USE_DOCKER_RE_API } = $use_docker_re_api;
+    my $client = Bio::KBase::CytoscapeClient->new;
+
+    throws_ok {
+        $client->run()
+    } qr{Invalid parameter format: parameters must be a hashref},
+        'invalid input';
+
+    throws_ok {
+        $client->run( dry_run => 1 )
+    } qr{Invalid parameter format: parameters must be a hashref},
+        'invalid input again';
+
+    throws_ok {
+        $client->run( {} )
+    } qr{No workspace ID provided: cannot save results},
+        'No workspace ID provided';
+
+    {
+        # these are pretty unlikely...
+        my $return_structures = [
+            { query_params => {} },
+            { query_params => {}, query_results => undef },
+            { query_params => {}, query_results => {} },
+            { query_params => {}, query_results => [] },
+        ];
+        no strict 'refs';
+        no warnings 'redefine';
+        for my $return ( @$return_structures ) {
+            # override run_query to return bad results
+            local *Bio::KBase::RelationEngine::Client::run_query = sub {
+                # return the dodgy structure
+                return $return;
+            };
+
+            throws_ok {
+                $client->run({ workspace_id => 12345 })
+            } qr{No results found in response},
+                'Query returned no results'
+        }
+    }
+};
+
 subtest '$client->run (without creating a report)' => sub {
 
     my $use_docker_re_api = 1;
@@ -103,8 +150,8 @@ subtest '$client->run (without creating a report)' => sub {
     no strict 'refs';
     no warnings 'redefine';
     local *Bio::KBase::CytoscapeClient::prepare_report = sub {
-        my ( $self, $response_data, $ws_id ) = @_;
-        return { content => $response_data };
+        my ( $self, $results, $query_params, $ws_id ) = @_;
+        return { results => $results };
     };
     use strict;
     use warnings;
@@ -144,8 +191,8 @@ subtest '$client->run (without creating a report)' => sub {
                 test_success_response( $output, $test, $description );
 
                 unless ( $file_write_test_done || $test->{ coerce } ) {
-                    test_create_results_file( $client, $output->{ content }, $test );
-                    test_create_cytoscape_template( $client, $output->{ content }, $test );
+                    test_create_results_file( $client, $output->{ results }, $test );
+                    test_create_cytoscape_template( $client, $output->{ results }, $test );
                     $file_write_test_done++;
                 }
 
@@ -166,18 +213,18 @@ subtest '$client->run (without creating a report)' => sub {
 sub test_success_response {
     my ( $output, $test, $description ) = @_;
 
-    ok exists $output->{ content } && %{ $output->{ content } }
+    ok exists $output->{ results } && %{ $output->{ results } }
         && exists $output->{ query_params } &&  %{ $output->{ query_params } },
         'content and query params are present in output';
 
-    my $response_data = $output->{ content };
-    unless ( $response_data->{ results } ) {
-        ok exists $response_data->{ results }
-            && exists $response_data->{ results }[ 0 ],
-            'results key is defined in the response content';
-        return;
-    }
-    my $got      = $response_data ->{ results }[ 0 ];
+    # my $response_data = $output->{ content };
+    # unless ( $response_data->{ results } ) {
+    #     ok exists $response_data->{ results }
+    #         && exists $response_data->{ results }[ 0 ],
+    #         'results key is defined in the response content';
+    #     return;
+    # }
+    my $got      = $output->{ results };
     my $expected = $test->{ results } || $test->{ coerce };
 
     compare_results( $got, $expected, $output );
@@ -230,7 +277,7 @@ sub test_create_cytoscape_template {
     subtest 'create cytoscape template' => sub {
         my $run_dir = $client->run_directory;
         ok !path( $run_dir, 'cytoscape.html' )->is_file, 'cytoscape file does not exist';
-        $client->create_cytoscape_template( $response );
+        $client->create_cytoscape_template( $response, {} );
         ok path( $run_dir, 'cytoscape.html' )->is_file, 'cytoscape file now exists';
         # read in the file
         my $cytoscape_content = path( $run_dir, 'cytoscape.html' )->slurp_utf8;
