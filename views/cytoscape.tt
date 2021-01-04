@@ -3,7 +3,7 @@
 #     'https://d3js.org/d3-fetch.v1.min.js',
 #     'https://cdnjs.cloudflare.com/ajax/libs/crossfilter2/1.5.2/crossfilter.min.js',
 #     'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.14.1/cytoscape.min.js',
-    '/static/cytoscape/js/dist/kb-cytoscape.umd.js',
+    'kb-cytoscape.umd.js',
   ];
 
   style_arr = [

@@ -255,6 +255,7 @@ sub prepare_report {
 
     $self->create_results_file( $results );
     $self->create_cytoscape_template( $results, $query_params );
+    $self->copy_js;
     # $self->create_data_config_file;
     # create the kbase report
     return $self->create_kbase_report( $workspace_id );
@@ -371,6 +372,16 @@ sub create_kbase_report {
     catch {
         die 'Report generation failed: ' . $_;
     };
+}
+
+# copy the cytoscape JS file over into the run directory
+sub copy_js {
+    my ( $self ) = @_;
+
+    path( $self->config->app_dir, 'views', 'kb-cytoscape.umd.js' )
+        ->copy( $self->run_directory, 'kb-cytoscape.umd.js' );
+
+    return;
 }
 
 1;
