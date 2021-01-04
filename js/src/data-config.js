@@ -1,4 +1,5 @@
 function loadMetadata() {
+  /* N.b. THIS IS OUT OF DATE! */
   return {
     djornl_node: {
       user_notes: {

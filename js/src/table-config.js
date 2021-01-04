@@ -384,9 +384,7 @@ function columnList(type) {
       'gene_full_name',
       'edges',
       'gene_model_type',
-      'cluster_i2',
-      'cluster_i4',
-      'cluster_i6',
+      'clusters',
       'tair_computational_desc',
       'tair_curator_summary',
       'tair_short_desc',
@@ -483,6 +481,8 @@ function columnConfig(type) {
  *
  * @param {string} type
  * @returns {object[]} searchPane configuration
+ *
+ * Not currently in use
  */
 function searchPaneConfig(type) {
   const columns = columnList(type);
@@ -499,9 +499,7 @@ function searchPaneConfig(type) {
     //       'Gene symbol',
     //       'Gene full name',
     'Gene model type',
-    'cluster_I2',
-    'cluster_I4',
-    'cluster_I6',
+    'clusters',
     //       'TAIR computational desc',
     //       'TAIR curator summary',
     //       'TAIR short desc',
@@ -533,9 +531,7 @@ function formatData(d) {
   const propertyList = {
       gene: [
         'gene_model_type',
-        'cluster_i2',
-        'cluster_i4',
-        'cluster_i6',
+        'clusters',
         'tair_computational_desc',
         'tair_curator_summary',
         'tair_short_desc',

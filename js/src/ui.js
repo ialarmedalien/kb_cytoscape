@@ -1,28 +1,14 @@
 import $ from 'jquery';
 // import popper from 'cytoscape-popper';
 import layoutsAvailable from './cytoscapeLayouts';
-import { loadDataset } from './data';
+import { loadData } from './data';
 
 /**
- * get the checked dataset IDs from the dataset input set
- *
- * @returns {string[]} dataset IDs
- */
-function evalDatasets() {
-  return $('input[name=dataset]:checked')
-    .map((i, e) => {
-      return e.value;
-    })
-    .get();
-}
-
-/**
- * listen to click events on '#dataset--button' and load the data for selected datasets
+ * listen to click events on '#dataset--button' and load the data
  */
 function addDatasetSelector() {
   $('#dataset--button').on('click keypress', () => {
-    const datasets = evalDatasets();
-    loadDataset(datasets);
+    loadData();
   });
 }
 

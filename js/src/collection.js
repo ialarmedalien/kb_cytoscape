@@ -1,4 +1,4 @@
-import { refreshTable } from './tables'
+import { refreshTable } from './tables';
 
 class Collection {
   /**
@@ -8,9 +8,9 @@ class Collection {
    * @memberof Collection
    */
   constructor(graphObject, dataObject) {
-    this._graph = graphObject
-    this._data = dataObject || null
-    this._collection = graphObject.collection()
+    this._graph = graphObject;
+    this._data = dataObject || null;
+    this._collection = graphObject.collection();
   }
 
   /**
@@ -22,9 +22,9 @@ class Collection {
    */
   data(dataObject) {
     if (dataObject) {
-      this._data = dataObject
+      this._data = dataObject;
     }
-    return this._data
+    return this._data;
   }
 
   /**
@@ -37,16 +37,16 @@ class Collection {
    * @memberof Collection
    */
   collectSelectedGraphNodes() {
-    const selectedNodes = this._graph.collectSelectedNodes()
-    this._collection = this._collection.union(selectedNodes)
+    const selectedNodes = this._graph.collectSelectedNodes();
+    this._collection = this._collection.union(selectedNodes);
 
     // ensure all node data is populated
     this._collection.forEach((c) => {
       if (!this._data.collection[c.id()]) {
-        this._data.collection[c.id()] = this._data.node[c.id()]
+        this._data.collection[c.id()] = this._data.node[c.id()];
       }
-    })
-    refreshTable('collection')
+    });
+    refreshTable('collection');
   }
 
   /**
@@ -64,15 +64,15 @@ class Collection {
     dt.rows({ selected: true })
       .data()
       .each((d) => {
-        let id = d.id
-        this._data.collection[id] = this._data.node[id]
+        let id = d.id;
+        this._data.collection[id] = this._data.node[id];
 
-        let node = this._graph.collectNode(id)
+        let node = this._graph.collectNode(id);
         if (node) {
-          this._collection = this._collection.union(node)
+          this._collection = this._collection.union(node);
         }
-      })
-    refreshTable('collection')
+      });
+    refreshTable('collection');
   }
 
   /**
@@ -90,16 +90,16 @@ class Collection {
       .data()
       .each((d) => {
         // extract the source and target
-        let id_arr = [d.source, d.target]
+        let id_arr = [d.source, d.target];
         id_arr.forEach((id) => {
-          this._data.collection[id] = this._data.node[id]
-          let node = this._graph.collectNode(id)
+          this._data.collection[id] = this._data.node[id];
+          let node = this._graph.collectNode(id);
           if (node) {
-            this._collection = this._collection.union(node)
+            this._collection = this._collection.union(node);
           }
-        })
-      })
-    refreshTable('collection')
+        });
+      });
+    refreshTable('collection');
   }
 
   /**
@@ -112,11 +112,11 @@ class Collection {
    * @memberof Collection
    */
   discardSelectedGraphNodes() {
-    const selectedNodes = this._graph.discardSelectedNodes()
-    this._collection = this._collection.difference(selectedNodes)
+    const selectedNodes = this._graph.discardSelectedNodes();
+    this._collection = this._collection.difference(selectedNodes);
 
-    this._collection.forEach((c) => delete this._data.collection[c.id()])
-    refreshTable('collection')
+    this._collection.forEach((c) => delete this._data.collection[c.id()]);
+    refreshTable('collection');
   }
 
   /**
@@ -134,14 +134,14 @@ class Collection {
     dt.rows({ selected: true })
       .data()
       .each((d) => {
-        let id = d.id
-        delete this._data.collection[id]
-        let node = this._graph.discardNode(id)
+        let id = d.id;
+        delete this._data.collection[id];
+        let node = this._graph.discardNode(id);
         if (node) {
-          this._collection = this._collection.difference(node)
+          this._collection = this._collection.difference(node);
         }
-      })
-    refreshTable('collection')
+      });
+    refreshTable('collection');
   }
 
   /**
@@ -159,17 +159,17 @@ class Collection {
       .data()
       .each((d) => {
         // extract the source and target
-        let id_arr = [d.source, d.target]
+        let id_arr = [d.source, d.target];
         id_arr.forEach((id) => {
-          delete this._data.collection[id]
-          let node = this._graph.discardNode(id)
+          delete this._data.collection[id];
+          let node = this._graph.discardNode(id);
           if (node) {
-            this._collection = this._collection.difference(node)
+            this._collection = this._collection.difference(node);
           }
-        })
-      })
-    refreshTable('collection')
+        });
+      });
+    refreshTable('collection');
   }
 }
 
-export default Collection
+export default Collection;
