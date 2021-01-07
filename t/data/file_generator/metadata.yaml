@@ -1,0 +1,70 @@
+module_name: yet_another_kbase_module
+service_language: whitespace
+description: Something we came up with on the spur of the moment
+
+owners:
+  - id: Tintin
+    email: tintin@herge.org
+
+  - id: Snowy
+    email: snowy@herge.org
+
+authors:
+  - id: Tintin
+    email: tintin@herge.org
+
+  - id: Snowy
+    email: snowy@herge.org
+
+  - id: Captain Haddock
+    email: capn.haddock@gmail.com
+
+  - id: Bianca Castafiore
+    email: b.castafiore@gmail.com
+
+methods:
+  - method_name: run_yet_another_kbase_method
+    human_method_name: Run yet another KBase method
+    description: A long description of all the cool things that this method does.
+    categories:
+      - active
+      - awesome
+      - cool
+      - things to tell all your friends about
+
+    parameters:
+      input:
+        five_by_five:
+          type: int
+          mapping: constant_value
+
+        system_variable_a:
+          type: string
+          mapping: narrative_system_variable
+
+        zero_or_one:
+          type: int
+          mapping: input_parameter
+          display:
+            ui-name: Zero or one?
+            short-hint: Is this zero or is it one?
+          spec:
+            id: zero_or_one
+            advanced: true
+            default_values: [0]
+            field_type: dropdown
+            optional: false
+            dropdown_options:
+              options:
+                - display: zero
+                  value: 0
+                - display: one
+                  value: 1
+
+      output:
+        report_name:
+          type: string
+        report_ref:
+          type: string
+        another_param:
+          type: int

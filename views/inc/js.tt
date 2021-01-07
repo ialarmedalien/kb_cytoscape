@@ -1,62 +1,218 @@
 [%
+  # js_wrapper
+  #
+  # standard JS wrapper to execute code on page load and set the first navigation tab to active
 
-# l - length changing input control
-# f - filtering input
-# t - The table!
-# i - Table information summary
-# p - pagination control
-# r - processing display element
-#
-# "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
-# "<'row'<'col-sm-12'tr>>" +
-# "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-#
-# B - Buttons
-# R - ColReorder
-# S - Scroller
-# P - SearchPanes
+  BLOCK js_wrapper;
+%]
+  <script>
+  "use strict";
+  $(document).ready( () => {
+[% content %]
+    $('#navigation li:first-child a').tab('show')
+  })
+  </script>
+[% END; # end block
 
-  BLOCK default_table_conf %]
 
-    const tableConfig = {
+
+  # default_datatables_js
+  #
+  # block to insert the appropriate JS to initialise a single DataTables table
+  #
+  # template variables used:
+  #   table_id: 'some_table_id'   # ID of the table
+
+  #   cols:                       # specification for the column format in DataTables syntax
+                                  # see https://datatables.net/reference/option/columns
+
+  #   EITHER:
+  #   data_array:                 # (optional) - template variable holding table data
+                                  # should be an array of arrays or an array of objects
+                                  # see https://datatables.net/manual/data/#Data-source-types
+
+  #   OR:
+  #   data_file: '/path/to/file'  # (optional) - path to file containing table data
+
+  #   data_file_format: ('csv'|'tsv'|'json')
+                                  # (optional) - data file format
+
+  #   ajax_data_src:              # (optional) - for JSON files, where to look for the
+                                  # data for tabulation.
+                                  # data is expected to be an array of objects in JSON format
+                                  # i.e. [ {...}, {...}, {...} ]
+                                  # if the table data is not the top level array, `ajax_data_src`
+                                  # can be used to specify the location
+                                  # see https://datatables.net/manual/ajax for more details
+
+
+  #   custom_data_load_block:     # (optional) a block to be processed to wrangle data and
+                                  # use it to populate the table (e.g. via tableConfig.data or
+                                  # tableConfig.ajax).
+
+
+  BLOCK default_datatables_js;
+
+    # the following code is a mixture of Template Toolkit syntax and JavaScript
+    # WRAPPER js_wrapper surrounds the content with a 'script' tag and a JS function
+    # that runs when the document is ready
+
+    WRAPPER js_wrapper;
+
+    # supply the column header names for the table %]
+    const cols = [% cols %];
+
+[%
+      IF data_array;
+
+      # add in the data to be used as the table contents
+      # by default Template Toolkit (TT) outputs them in a JavaScript/Python-like syntax
+      # so they can be written directly into the script
+%]
+    const dataSet = [% data_array %];
+[%
+      # record the name of the variable storing the table data
+      data_js_variable = 'dataSet';
+
+      END;
+
+    # include a TT block that specifies a standard table config
+    # this sets up all the table configuration but does not specify the data source
+    # for the table
+    PROCESS default_table_conf;
+
+    # include a TT block to set the table contents
+    # because the TT variable 'data_js_variable' is defined, the table content
+    # will be set to the JS variable 'dataSet'
+    PROCESS default_data_load;
+
+    END; # end JS wrapper
+  END; # end block
+
+
+
+  # default_table_conf
+
+  # a JS variable named 'cols' must already exist with the column configuration set up
+  # see https://datatables.net/reference/option/columns for details on how to specify columns
+  #
+  # see 'default_data_load' for data loading and code to trigger the table rendering.
+  #
+  # any of these values can be overwritten by code that follows this block
+
+  # 'dom' attribute -- sets up table layout
+  #
+  # l - length changing input control
+  # f - filtering input
+  # t - The table!
+  # i - Table information summary
+  # p - pagination control
+  # r - processing display element
+  #
+  # B - Buttons
+  # R - ColReorder
+  # S - Scroller
+  # P - SearchPanes
+  #
+  # example with bootstrap classes:
+  # "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
+  # "<'row'<'col-sm-12'tr>>" +
+  # "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+
+  BLOCK default_table_conf;
+
+%]
+    let tableConfig = {
       dom: 'Bfrtipl',
       buttons: [
         {
+          text: 'Downloads',
+          className: 'disabled',
+          enabled: false,
+        },
+        {
           extend: 'csv',
-          text: 'Download as CSV',
+          text: 'CSV',
+          extension: '.csv',
+        },
+        {
+          extend: 'csv',
+          text: 'TSV',
+          fieldSeparator: '\t',
+          extension: '.tsv',
+        },
+        {
+          text: 'JSON',
+          action: function ( e, dt, button, config ) {
+            $.fn.dataTable.fileSave(
+              new Blob( [ JSON.stringify( dt.buttons.exportData() ) ] ),
+              'Export.json'
+            );
+          },
         },
       ],
-      lengthMenu: [ [25, 50, -1], [25, 50, "All"] ],
+      lengthMenu: [ [25, 50, 100], [25, 50, 100] ],
       columns: cols,
-    }
+    };
 [%
-  END;
+  END; # end block
 
+
+
+  # dsv_wrapper
+  #
+  # surrounds a block of JS with a wrapper to retrieve and parse CSV or TSV data
+  # the first row of the file is assumed to be the column names
+  #
+  # template variables used:
+  #   data_file: '/path/to/file'        # path to file containing table data
+  #   data_file_format: ('csv' | 'tsv') # appropriate file format
+  #
+  # 'data' is an array of objects from the parsed file
+  # 'data.columns' contains the column headers in the order in which they appear in the file
+  #
+  # see https://github.com/d3/d3-dsv#dsvFormat for full details of the function
 
   BLOCK dsv_wrapper;
-  # requires:
-  # data_file : /path/to/data/file.txt
-  # data_file_format: csv | tsv
+
 %]
-    d3.text('[% data_file %]').then(function(lines) {
-      const data = d3.[% data_file_format %]Parse(lines)
-[%
-    content;
-%]
+    d3.text('[% data_file %]').then( lines => {
+      const data = d3.[% data_file_format %]Parse(lines);
+[%  content %]
     })
 [%
-  END;
+  END; # end block
 
+
+
+  # default_data_load
+  #
+  # template variables used:
+  #   table_id: 'some_table_id'   # ID of the table
+  #   data_file: '/path/to/file'  # path to file containing table data (optional)
+
+  #   data_file_format: ('csv'|'tsv'|'json')
+                                  # (optional) - data file format
+
+  #   data_js_variable:           # (optional) - the JS variable holding table data
+                                  # should be an array of arrays or an array of objects
+                                  # see https://datatables.net/manual/data/#Data-source-types
+
+  #   ajax_data_src:              # (optional) - for JSON files, where to look for the
+                                  # data for tabulation.
+                                  # data is expected to be an array of objects in JSON format
+                                  # i.e. [ {...}, {...}, {...} ]
+                                  # if the table data is not the top level array, `ajax_data_src`
+                                  # can be used to specify the location
+                                  # see https://datatables.net/manual/ajax for more details
+
+  #   custom_data_load_block:     # (optional) a block to be processed to wrangle data and
+                                  # use it to populate the table (e.g. via tableConfig.data or
+                                  # tableConfig.ajax).
 
   BLOCK default_data_load;
-  #
-  # args:
-  #   data_file: '/path/to/file'        # path to file containing table data
-  #   data_file_format: ('csv' | 'tsv') # optional
-  #   table_id: 'some_table_id'         # ID of the table
 
-    IF data_file_format
-      && ( data_file_format == 'csv' || data_file_format == 'tsv' );
+    IF data_file_format && ( data_file_format == 'csv' || data_file_format == 'tsv' );
 
       WRAPPER dsv_wrapper;
 %]
@@ -65,64 +221,37 @@
 [%
       END;
 
-    ELSIF data_file;
-      # retrieve the data file by AJAX
-%]
-      tableConfig.ajax = '[% data_file %]'
-      $('#[% table_id %]').DataTable(tableConfig)
-[%
     ELSE;
 
-      # custom code to get data goes here
+      IF data_file_format && data_file_format == 'json' || data_file;
+        #
+        # retrieve the data file by AJAX
+        # data is expected to be an array of objects in JSON format
+        # i.e. [ {...}, {...}, {...} ]
+        # see https://datatables.net/manual/ajax for more details
+        #
+        IF ! ajax_data_src;
+          ajax_data_src = '';
+        END;
 %]
-      tableConfig.data = table_data
-      $('#[% table_id %]').DataTable(tableConfig)
-[%  END;
-
-  END;
-
-
-  BLOCK default_js; %]
-<script>
-  "use strict";
-  $(document).ready(function () {
-
-    const cols = [
-      { data: 'term_id',            title: 'Term ID' },
-      { data: 'term',               title: 'Description' },
-      { data: 'ontology',           title: 'Ontology' },
-      { data: 'num_in_feature_set', title: 'Number in FeatureSet' },
-      { data: 'num_in_ref_genome',  title: 'Number in Genome' },
-      { data: 'raw_p_value',        title: 'Raw p-value' },
-      { data: 'adjusted_p_value',   title: 'Corrected p-value' },
-    ]
+    tableConfig.ajax = {
+      url: '[% data_file %]',
+      dataSrc: "[% ajax_data_src %]",
+    }
 [%
-    # write out the default table config
-    default_table_conf;
-
-    # write out the data loading code
-    default_data_load;
-
-    IF data_file_format
-      && ( data_file_format == 'csv' || data_file_format == 'tsv' ); %]
-
-    d3.[% data_file_format %]('[% data_file %]').then(function(data) {
-[%
-      # put in any data wrangling here
+      ELSIF data_js_variable;
+        # data in a JS variable
 %]
-      tableConfig.data = data
-      $('#[% table_id %]').DataTable(tableConfig);
-    });
+    tableConfig.data = [% data_js_variable %];
 [%
-    ELSIF data_file;
-      # retrieve the data file by AJAX
+      ELSE;
+        IF custom_data_load_block;
+          custom_data_load_block;
+        END;
+      END;
 %]
-      tableConfig.ajax = '[% data_file %]'
-      $('#[% table_id %]').DataTable(tableConfig)
-
-    ELSIF
-
-[%  END %]
-  })
-</script>
-[% END %]
+    $('#[% table_id %]').DataTable(tableConfig);
+[%
+    END; # end if data_file_format && ...
+  END; # end block
+%]

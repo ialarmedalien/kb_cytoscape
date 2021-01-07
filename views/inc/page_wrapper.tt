@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
 [%
+
     PROCESS 'views/inc/header.tt';
 
-    # load any other scripts
-    IF scr_arr;
-        FOREACH s IN scr_arr;
-            '<script type="text/javascript" src="' _ s _ '"></script>';
-        END;
-    END;
 %]
   <title>[% page_title %]</title>
 </head>

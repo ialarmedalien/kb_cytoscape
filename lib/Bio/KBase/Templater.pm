@@ -28,7 +28,7 @@ $template       # input template; possible formats:
 $template_data  # data to use in the template (hashref; optional)
 
 $output         # where to write the output to; possible formats:
-                #   - filename (absolute)
+                #   - filename (absolute or relative to the caller)
                 #   - open file GLOB
                 #   - reference to a scalar variable to append output to
                 #   - reference to a sub which is called with output as a param

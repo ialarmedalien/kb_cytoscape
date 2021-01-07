@@ -1,0 +1,82 @@
+severity = 5
+verbose = %f: [%p] %m at line %l, column %c (Severity %s).\n%d\n
+
+theme = core + pbp + bugs + maintenance + cosmetic + complexity + security + tests
+program-extensions = pl psgi t
+
+[BuiltinFunctions::ProhibitStringySplit]
+severity = 4
+
+[CodeLayout::ProhibitHardTabs]
+severity = 5
+
+[CodeLayout::ProhibitTrailingWhitespace]
+severity = 5
+
+[CodeLayout::RequireConsistentNewlines]
+severity = 5
+
+[CodeLayout::RequireTrailingCommas]
+severity = 5
+
+[ControlStructures::ProhibitCStyleForLoops]
+severity = 4
+
+[-ControlStructures::ProhibitNegativeExpressionsInUnlessAndUntilConditions]
+[-ControlStructures::ProhibitPostfixControls]
+
+[-ErrorHandling::RequireCarping]
+
+[InputOutput::RequireBracedFileHandleWithPrint]
+severity = 2
+
+[InputOutput::RequireCheckedSyscalls]
+functions = :builtins
+exclude_functions = print say
+
+[-References::ProhibitDoubleSigils]
+
+# No need for /xsm everywhere
+[-RegularExpressions::RequireDotMatchAnything]
+[-RegularExpressions::RequireExtendedFormatting]
+[-RegularExpressions::RequireLineBoundaryMatching]
+
+[RegularExpressions::ProhibitComplexRegexes]
+max_characters = 200
+
+[RegularExpressions::ProhibitUnusualDelimiters]
+severity = 3
+
+[Subroutines::ProhibitUnusedPrivateSubroutines]
+private_name_regex = _(?!build)\w+
+
+# http://stackoverflow.com/questions/2275317/why-does-perlcritic-dislike-using-shift-to-populate-subroutine-variables
+[-Subroutines::RequireArgUnpacking]
+
+[Subroutines::RequireFinalReturn]
+severity = 2
+
+[TestingAndDebugging::RequireUseStrict]
+equivalent_modules = Test::Most
+
+[TestingAndDebugging::ProhibitNoStrict]
+allow = subs refs
+
+[TestingAndDebugging::RequireUseWarnings]
+severity = 5
+equivalent_modules = Test::Most
+
+[-ValuesAndExpressions::ProhibitEmptyQuotes]
+[-ValuesAndExpressions::ProhibitVersionStrings]
+[-ValuesAndExpressions::RequireConstantVersion]
+[ValuesAndExpressions::RequireUpperCaseHeredocTerminator]
+severity = 5
+
+[Variables::ProhibitPackageVars]
+packages = Data::Dumper YAML::XS
+
+[Variables::ProhibitReusedNames]
+severity = 5
+
+[Variables::ProhibitUnusedVariables]
+severity = 5

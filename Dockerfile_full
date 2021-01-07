@@ -1,25 +1,31 @@
 FROM kbase/sdkbase2:latest
 
-# update kb-sdk
-RUN cd /root/src/kb_sdk \
-    && git remote add iaa https://github.com/ialarmedalien/kb_sdk.git \
-    && git pull iaa better_perl_and_tests \
-    && git checkout better_perl_and_tests \
-    && make \
-    && cp bin/kb-sdk /usr/local/bin
-
-WORKDIR /kb/module
+# install cpan dependencies and then remove installation leftovers
 COPY ./cpanfile /kb/module/cpanfile
 
-# install cpan dependencies and then remove installation leftovers
+WORKDIR /kb/module
+
 RUN cpanm --installdeps . \
     && cd ~ && rm -rf .cpanm
+
+# update kb-sdk
+RUN cd /root/src/kb_sdk \
+    && git checkout develop \
+    && make \
+    && cp bin/kb-sdk /usr/local/bin
 
 COPY ./ /kb/module
 
 WORKDIR /kb/module
 
-RUN mkdir -p /kb/module/work && \
+ENV APP_DIR /kb/module
+ENV KB_DEPLOYMENT_CONFIG /kb/module/deploy.cfg
+ENV PERL5LIB="/kb/module/lib:${PERL5LIB}"
+
+RUN git clone https://github.com/kbase/relation_engine.git
+
+RUN env && \
+    mkdir -p /kb/module/work && \
     chmod -R a+rw /kb/module && \
     make all
 

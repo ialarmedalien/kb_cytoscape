@@ -1,4 +1,7 @@
 test_local
 sdk.cfg
-relation_engine_api
 cytoscape.js-popper
+*.old
+node_modules/
+exascale_data/
+relation_engine/

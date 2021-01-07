@@ -1,0 +1,157 @@
+{
+  "ver": "6.6.6",
+  "authors": [
+    "Tintin",
+    "Snowy",
+    "Captain Haddock",
+    "Bianca Castafiore"
+  ],
+  "contact": "tintin@herge.org",
+  "categories": [
+    "active",
+    "awesome",
+    "cool",
+    "things to tell all your friends about"
+],
+  "widgets": {
+    "input": null,
+    "output": null
+  },
+  "parameters": [
+    {
+      "id": "cluster_ids",
+      "advanced": false,
+      "allow_multiple": false,
+      "field_type": "textarea",
+      "optional": true,
+      "textarea_options": {
+        "n_rows": 4
+      }
+    },
+    {
+      "id": "distance",
+      "advanced": false,
+      "allow_multiple": false,
+      "field_type": "text",
+      "optional": true,
+      "text_options": {
+        "max_int": 100,
+        "min_int": 0,
+        "validate_as": "int"
+      }
+    },
+    {
+      "id": "edge_types",
+      "advanced": false,
+      "allow_multiple": true,
+      "dropdown_options": {
+        "multiselection": true,
+        "options": [
+          {
+            "display": "AraGWAS phenotype associations",
+            "value": "phenotype-association_AraGWAS"
+          },
+          {
+            "display": "AraNetv2 pairwise gene coexpression",
+            "value": "pairwise-gene-coexpression_AraNet_v2"
+          },
+          {
+            "display": "AraNetv2 domain co-occurrence",
+            "value": "domain-co-occurrence_AraNet_v2"
+          },
+          {
+            "display": "AraNetv2 high-throughput protein-protein interaction",
+            "value": "protein-protein-interaction_high-throughput_AraNet_v2"
+          },
+          {
+            "display": "AraNetv2 literature-curated protein-protein interaction",
+            "value": "protein-protein-interaction_literature-curation_AraNet_v2"
+          }
+        ]
+      },
+      "field_type": "dropdown",
+      "optional": true
+    },
+    {
+      "id": "search_text",
+      "advanced": false,
+      "allow_multiple": false,
+      "field_type": "text",
+      "optional": true
+    },
+    {
+      "id": "zero_or_one",
+      "advanced": true,
+      "field_type": "dropdown",
+      "optional": false,
+      "default_values": [0],
+      "dropdown_options": {
+        "options": [
+          { "display": "zero", "value": 0 },
+          { "display": "one", "value": 1 }
+        ]
+      }
+    }
+  ],
+  "behavior": {
+    "service-mapping": {
+      "url": "",
+      "name": "yet_another_kbase_module",
+      "method": "run_yet_another_kbase_method",
+      "input_mapping": [
+        {
+          "input_parameter": "cluster_ids",
+          "target_property": "cluster_ids"
+        },
+        {
+          "input_parameter": "distance",
+          "target_property": "distance"
+        },
+        {
+          "input_parameter": "edge_types",
+          "target_property": "edge_types"
+        },
+        {
+          "constant_value": "five_by_five",
+          "target_property": "five_by_five"
+        },
+        {
+          "input_parameter": "search_text",
+          "target_property": "search_text"
+        },
+        {
+          "narrative_system_variable": "system_variable_a",
+          "target_property": "system_variable_a"
+        },
+        {
+          "input_parameter": "zero_or_one",
+          "target_property": "zero_or_one"
+        }
+      ],
+      "output_mapping": [
+        {
+          "service_method_output_path": [
+            0,
+            "another_param"
+          ],
+          "target_property": "another_param"
+        },
+        {
+          "service_method_output_path": [
+            0,
+            "report_name"
+          ],
+          "target_property": "report_name"
+        },
+        {
+          "service_method_output_path": [
+            0,
+            "report_ref"
+          ],
+          "target_property": "report_ref"
+        }
+      ]
+    }
+  },
+  "job_id_output_field": "docker"
+}

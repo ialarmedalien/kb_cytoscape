@@ -1,0 +1,30 @@
+name: djornl_fetch_genes
+description: Fetch a gene document by list of keys
+params:
+  type: object
+  required: [keys]
+  properties:
+    keys:
+      type: array
+      items: {type: string}
+      title: Gene Keys
+      examples: [[AT1G01010]]
+query: |
+  LET node_ids = (
+    FOR gene IN djornl_gene
+      FILTER gene._key IN @keys
+      FOR node IN 0..@distance ANY gene djornl_edge
+        OPTIONS {bfs: true, uniqueVertices: "global"}
+        RETURN DISTINCT node._id
+  )
+  let edges = (
+    FOR edge IN djornl_edge
+      FILTER edge._from IN node_ids AND edge._to IN node_ids
+      RETURN edge
+  )
+  let nodes = (
+    FOR node IN djornl_gene
+        FILTER node._id IN node_ids
+        RETURN node
+  )
+  RETURN {nodes, edges}

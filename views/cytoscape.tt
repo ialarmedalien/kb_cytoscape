@@ -1,499 +1,278 @@
 [%
-    scr_arr = [
-      'https://d3js.org/d3-fetch.v1.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/crossfilter2/1.5.2/crossfilter.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.14.1/cytoscape.min.js',
-    ]
+  script_arr = [
+#     'https://d3js.org/d3-fetch.v1.min.js',
+#     'https://cdnjs.cloudflare.com/ajax/libs/crossfilter2/1.5.2/crossfilter.min.js',
+#     'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.14.1/cytoscape.min.js',
+    'kb-cytoscape.umd.js',
+  ];
 
-    page_title = 'Cytoscape Demo';
+  style_arr = [
+      "https://cdn.datatables.net/v/bs-3.3.7/jq-3.3.1/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-colvis-1.6.2/b-html5-1.6.2/b-print-1.6.2/cr-1.5.2/fh-3.1.7/sc-2.0.2/sp-1.1.0/sl-1.3.1/datatables.min.css"
+  ];
+#   include_datatables = 1;
+  page_title = 'Cytoscape Demo';
 
-    PROCESS 'views/inc/macros.tt';
-    PROCESS 'views/inc/js.tt';
-    WRAPPER 'views/inc/page_wrapper.tt';
+  BLOCK inline_style %]
+
+.radio-toggle input[type="radio"] {
+  opacity: 0;
+  position: fixed;
+  width: 0;
+}
+
+.radio-toggle label {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.radio-toggle input[type="radio"]:focus + label {
+  border-style: dashed;
+}
+
+.radio-toggle input[type="radio"]:checked + label {
+  border-style: dashed;
+}
+[%
+# .radio-toggle label {
+#   border-style: 2px solid #444;
+#   border-radius: 4px;
+# }
+#
+# .radio-toggle label:hover {
+#   background-color: #dfd;
+# }
+#
+# .radio-toggle input[type="radio"]:focus + label {
+#   border: 2px dashed #444;
+# }
+#
+# .radio-toggle input[type="radio"]:checked + label {
+#   background-color: #bfb;
+#   border-color: #4c4;
+# }
+%]
+.nav-link .badge {
+  margin-left: 7px;
+}
+
+[%
+  END;
+
+  inline_style_statements = PROCESS inline_style;
+#   include_datatables = 1;
+
+  PROCESS 'views/inc/macros.tt';
+  PROCESS 'views/inc/js.tt';
+  WRAPPER 'views/inc/page_wrapper.tt';
 
     cytoscape_content = PROCESS cytoscape;
+    dataset_content = PROCESS dataset_picker;
 
     page_content = [
         {
-          name              => "Cytoscape Demo",
-          name_lc           => "graph_demo",
+          name              => 'Dataset Picker',
+          name_lc           => 'dataset_tab',
+          rendered_content  => dataset_content,
+        },
+        {
+          name              => 'Node Metadata <span class="badge" id="node_count"></span>',
+          name_lc           => 'node_metadata_tab',
+          content           => 'table',
+          table_config => {
+            id                => 'node_table',
+            for_datatables_js => 1,
+          },
+        },
+        {
+          name              => 'Edge Metadata <span class="badge" id="edge_count"></span>',
+          name_lc           => 'edge_metadata_tab',
+          content           => 'table',
+          table_config => {
+            id              => 'edge_table',
+            for_datatables_js => 1,
+          },
+        },
+        {
+          name              => 'Collected Nodes <span class="badge" id="collection_count"></span>',
+          name_lc           => 'collection_tab',
+          content           => 'table',
+          table_config => {
+            id              => 'collection_table',
+            for_datatables_js => 1,
+          },
+        },
+        {
+          name              => "Cytoscape",
+          name_lc           => "graph",
           rendered_content  => cytoscape_content,
         },
     ];
 
-    tabbed_layout( page_content = page_content );
+    tabbed_layout;
 
-    BLOCK cytoscape  %]
+    BLOCK dataset_picker %]
     <div class="container-fluid">
       <div class="row">
-        <div id="cy" style="height: 1000px" class="col-md-10"></div>
-        <div id="controls" class="col-md-2">
-          <h2>Data</h2>
-          <div class="form-group" id="dataset--div">
-[%
-    data_sources = {
-      'pheno_assn' => 'GWAS associations produced by analyzing a subset of phenotypes and SNPs in the Arabidopsis 1001 Genomes database (13,918 nodes, 40864 edges; phenotype data)',
-      'domain_co_occur' => 'protein domain co-occurrence values from the Arabidopsis AraNetv2 database (7634 nodes, 25000 edges)',
-      'gene_coexpr' => 'pairwise gene coexpression values from the Arabidopsis AraNetv2 database (10,307 nodes, 50095 edges)',
-      'ppi_liter' => 'protein-protein interaction values from literature-curated small- to medium-scale experimental data; from the Arabidopsis AraNetv2 database (2709 nodes, 5168 edges)',
-      'ppi_hithru' => 'protein-protein interaction values derived from four high-throughput PPI screening experiments; from the Arabidopsis AraNetv2 database (4216 nodes, 8000 edges)',
-    };
-          FOR src IN data_sources.keys; %]
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" value="[% src %]" name="dataset" />
-                [% data_sources.$src %]
-              </label>
-            </div>
-[%        END %]
-
-          </div>
+        <div class="form-group" id="dataset--div">
+        <p>Query run: [% query_params.query %]</p>
+        <p>Query params:<p>
+        <pre>
+[%      USE Dumper;
+        Dumper.dump(query_params.params); %]
+        </pre>
+        <p>Results summary:</p>
+        <p>Nodes found: [% results.nodes.size %]</p>
+        <p>Edges found: [% results.edges.size %]</p>
+        <p>Results as JSON: <a href="dataset.json">Results as JSON</a></p>
+        <p>Click the button to load the results:</p>
           <div class="form-group">
             <button id="dataset--button" class="btn dataset--button">
-              Load datasets into graph
+              Load results
             </button>
           </div>
-          <h2>Layout</h2>
-          <div class="form-group" id="layout--div"></div>
-          <div class="form-group" id="layout_fit--div">
-            <button id="layout_fit--button" class="btn layout_fit--button">
-              Fit to viewport
-            </button>
-          </div>
-          <div class="form-group" id="layout_reset--div">
-            <button id="layout_reset--button" class="btn layout_reset--button">
-              Reset layout
-            </button>
-          </div>
-          <h2>Selection</h2>
-          <div class="form-group">
-            <button id="select_all--button" class="btn">
-              Select All
-            </button>
-            <button id="select_none--button" class="btn">
-              Select None
-            </button>
-            <button id="select_invert--button" class="btn">
-              Invert selection
-            </button>
-          </div>
-          <div class="form-group">
-            <!-- If enabled along with panning, the user must hold down one of shift, control, alt, or command to initiate box selection. -->
-            <button id="select_box--button" class="btn" data-toggle="button" aria-pressed="false" type="button">
-              Toggle box selection
-            </button>
-            <button id="select_multiple--button" class="btn" data-toggle="button" aria-pressed="false" type="button">
-              Toggle multiple selection
-            </button>
-          </div>
-          <h2>Filtering</h2>
-          <div class="form-group">
-            <label for="filter_degree--range">Filter by degree</label>
-            <input type="range" id="filter_degree--range" name="filter_degree" min="0" max="11">
-            <button id="filter_degree--button" class="btn">Filter!</button>
-          </div>
-          <ul>
-            <li>get neighbourhood of selected nodes</li>
-            <li>select nodes from ID list</li>
-            <li>select nodes by edge metadata</li>
-            <li>select nodes by node metadata</li>
-          </ul>
-          <h2>Export</h2>
-          <div class="form-group">
-            <button id="export_json--button" class="btn">
-              Export as JSON
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <table id="metadata"></table>
         </div>
       </div>
     </div>
 [%
     END;
-%]
-<script>
-  "use strict";
 
-  function renderGraph(element_id, node_arr, edge_arr) {
-    return cytoscape({
-      container: document.getElementById(element_id), // container to render in
-      elements: {
-        nodes: node_arr,
-        edges: edge_arr,
-      },
-      layout: layouts['random'],
+    BLOCK cytoscape %]
+    <div class="container-fluid">
+      <div class="row" id="cy">
+        <div id="cy--graph" style="height: 1000px" class="col-md-10"></div>
+        <div id="cy--controls" class="col-md-2">
+          <div class="form-group" id="layout_fit--div">
+            <button id="render_chart--button" class="btn render_chart--button"
+              data-action="renderData"
+              data-target="cy">
+              Render chart!
+            </button>
+            <button id="render_chart--button" class="btn render_chart--button"
+              data-action="renderCollection"
+              data-target="cy">
+              Render collection!
+            </button>
+          </div>
+          <h2>Layout</h2>
+          <div class="form-group" id="layout--div">
+            <select id="layout--select" class="form-control layout--select" name="layout"
+              data-action="setLayout"
+              data-target="cy">
+            </select>
+          </div>
+          <div class="form-group" id="layout_fit--div">
+            <button id="layout_fit--button" class="btn layout_fit--button col-md-6"
+              data-action="fit"
+              data-target="cy">
+              Fit to viewport
+            </button>
+            <button id="layout_reset--button" class="btn layout_reset--button col-md-6"
+              data-action="reset"
+              data-target="cy">
+              Reset layout
+            </button>
+          </div>
+          <h2>Selection <span class="badge" id="selection_count"></span></h2>
+          <div class="form-group">
+            <button id="select_all--button" class="btn"
+              data-action="selectAllNodes"
+              data-target="cy">
+              Select All
+            </button>
+            <button id="deselect_all--button" class="btn"
+              data-action="deselectAllNodes"
+              data-target="cy">
+              Select None
+            </button>
+            <button id="select_invert--button" class="btn"
+              data-action="invertNodeSelection"
+              data-target="cy">
+              Invert selection
+            </button>
+            <button id="select_neighbourhood--button" class="btn"
+              data-action="getNeighbourhood"
+              data-target="cy">
+              Get neighbourhood of selected nodes
+            </button>
+          </div>
+          <div class="form-group">
+          [%
+            default_vals = [ { label => 'Off', value => 0 }, { label => 'On', value => 1, checked => 1 } ];
+            cntrl_list = [
+              { name => 'boxSelectionEnabled',  title => 'Box selection', values => default_vals, },
+              {
+                name => 'selectionType',        title => 'Multiple selection',
+                values => [
+                  { label => 'Off', value => 'single' },
+                  { label => 'On', value => 'additive', checked => 1 }
+                ],
+              },
+              { name => 'userPanningEnabled',   title => 'Panning', values => default_vals, },
+              { name => 'userZoomingEnabled',   title => 'Zooming', values => default_vals, },
+            ];
 
-      // so we can see the ids
-      style: [
-        {
-          selector: 'node',
-          style: {
-            'width': 10,
-            'height': 10,
-            'shape': 'ellipse', // (ellipse/rectangle/round-diamond),
-          }
-        },
-        {
-          selector: 'node:selected',
-          style: {
-              "border-width": 2,
-              "border-style": "solid",
-              "border-color": "#3f3f3f",
-              "border-opacity": 1,
-              "background-color": '#900',
-              'label': 'data(id)'
-          },
-        },
-        {
-          selector: 'node.phenotype',
-          style: {
-            'width': 50,
-            'height': 50,
-            'shape': 'round-diamond',
-          },
-        },
-        {
-          selector: 'edge',
-          style: {
-            'width': 3,
-            'line-color': '#ccc',
-          }
-        }
-      ],
-    })
-  }
+            FOR cntrl IN cntrl_list %]
+            <div class="btn-group radio-toggle">
+              <p class="radio-toggle--title">[% cntrl.title %]</p>
+              [% FOR item IN cntrl.values %]
+              <label class="btn btn-primary radio-toggle--label" for="[% cntrl.name %]--[% item.value %]"><input type="radio" class="radio-toggle--input" name="[% cntrl.name %]" value="[% item.value %]" id="[% cntrl.name %]--[% item.value %]" [% IF item.checked %]checked[% END %] />
 
-
-  const layouts = {
-    random: {
-      name: 'random',
-
-      fit: true, // whether to fit to viewport
-      padding: 30, // fit padding
-      boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      animate: false, // whether to transition the node positions
-      animationDuration: 500, // duration of animation in ms if enabled
-      animationEasing: undefined, // easing of animation if enabled
-      animateFilter: function ( node, i ){ return true; }, // a function that determines whether the node should be animated.  All nodes animated by default on animate enabled.  Non-animated nodes are positioned immediately when the layout starts
-      ready: undefined, // callback on layoutready
-      stop: undefined, // callback on layoutstop
-      transform: function (node, position ){ return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
-    },
-    grid: {
-      name: 'grid',
-
-      fit: true, // whether to fit the viewport to the graph
-      padding: 30, // padding used on fit
-      boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
-      avoidOverlapPadding: 10, // extra spacing around nodes when avoidOverlap: true
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      spacingFactor: undefined, // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      condense: false, // uses all available space on false, uses minimal space on true
-      rows: undefined, // force num of rows in the grid
-      cols: undefined, // force num of columns in the grid
-      position: function( node ){}, // returns { row, col } for element
-      sort: undefined, // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
-      animate: false, // whether to transition the node positions
-      animationDuration: 500, // duration of animation in ms if enabled
-      animationEasing: undefined, // easing of animation if enabled
-      animateFilter: function ( node, i ){ return true; }, // a function that determines whether the node should be animated.  All nodes animated by default on animate enabled.  Non-animated nodes are positioned immediately when the layout starts
-      ready: undefined, // callback on layoutready
-      stop: undefined, // callback on layoutstop
-      transform: function (node, position ){ return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
-    },
-    circle: {
-      name: 'circle',
-      fit: true, // whether to fit the viewport to the graph
-      padding: 30, // the padding on fit
-      boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true, // prevents node overlap, may overflow boundingBox and radius if not enough space
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      spacingFactor: undefined, // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      radius: undefined, // the radius of the circle
-      startAngle: 3 / 2 * Math.PI, // where nodes start in radians
-      sweep: undefined, // how many radians should be between the first and last node (defaults to full circle)
-      clockwise: true, // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
-      sort: undefined, // a sorting function to order the nodes; e.g. function(a, b){ return a.data('weight') - b.data('weight') }
-      animate: false, // whether to transition the node positions
-      animationDuration: 500, // duration of animation in ms if enabled
-      animationEasing: undefined, // easing of animation if enabled
-      animateFilter: function ( node, i ){ return true; }, // a function that determines whether the node should be animated.  All nodes animated by default on animate enabled.  Non-animated nodes are positioned immediately when the layout starts
-      ready: undefined, // callback on layoutready
-      stop: undefined, // callback on layoutstop
-      transform: function (node, position ){ return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
-    },
-
-    concentric: {
-      name: 'concentric',
-
-      fit: true, // whether to fit the viewport to the graph
-      padding: 30, // the padding on fit
-      startAngle: 3 / 2 * Math.PI, // where nodes start in radians
-      sweep: undefined, // how many radians should be between the first and last node (defaults to full circle)
-      clockwise: true, // whether the layout should go clockwise (true) or counterclockwise/anticlockwise (false)
-      equidistant: false, // whether levels have an equal radial distance betwen them, may cause bounding box overflow
-      minNodeSpacing: 10, // min spacing between outside of nodes (used for radius adjustment)
-      boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
-      nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
-      height: undefined, // height of layout area (overrides container height)
-      width: undefined, // width of layout area (overrides container width)
-      spacingFactor: undefined, // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
-      concentric: function( node ){ // returns numeric value for each node, placing higher nodes in levels towards the centre
-        return node.degree();
-      },
-      levelWidth: function( nodes ){ // the letiation of concentric values in each level
-        return nodes.maxDegree() / 4;
-      },
-      animate: false, // whether to transition the node positions
-      animationDuration: 500, // duration of animation in ms if enabled
-      animationEasing: undefined, // easing of animation if enabled
-      animateFilter: function ( node, i ){ return true; }, // a function that determines whether the node should be animated.  All nodes animated by default on animate enabled.  Non-animated nodes are positioned immediately when the layout starts
-      ready: undefined, // callback on layoutready
-      stop: undefined, // callback on layoutstop
-      transform: function (node, position ){ return position; } // transform a given node position. Useful for changing flow direction in discrete layouts
-    },
-    cose: {
-      name: 'cose',
-
-      // Called on `layoutready`
-      ready: function(){},
-
-      // Called on `layoutstop`
-      stop: function(){},
-
-      // Whether to animate while running the layout
-      // true : Animate continuously as the layout is running
-      // false : Just show the end result
-      // 'end' : Animate with the end result, from the initial positions to the end positions
-      animate: true,
-
-      // Easing of the animation for animate:'end'
-      animationEasing: undefined,
-
-      // The duration of the animation for animate:'end'
-      animationDuration: undefined,
-
-      // A function that determines whether the node should be animated
-      // All nodes animated by default on animate enabled
-      // Non-animated nodes are positioned immediately when the layout starts
-      animateFilter: function ( node, i ){ return true; },
-
-
-      // The layout animates only after this many milliseconds for animate:true
-      // (prevents flashing on fast runs)
-      animationThreshold: 250,
-
-      // Number of iterations between consecutive screen positions update
-      refresh: 20,
-
-      // Whether to fit the network view after when done
-      fit: true,
-
-      // Padding on fit
-      padding: 30,
-
-      // Constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-      boundingBox: undefined,
-
-      // Excludes the label when calculating node bounding boxes for the layout algorithm
-      nodeDimensionsIncludeLabels: false,
-
-      // Randomize the initial positions of the nodes (true) or use existing positions (false)
-      randomize: false,
-
-      // Extra spacing between components in non-compound graphs
-      componentSpacing: 40,
-
-      // Node repulsion (non overlapping) multiplier
-      nodeRepulsion: function( node ){ return 2048; },
-
-      // Node repulsion (overlapping) multiplier
-      nodeOverlap: 4,
-
-      // Ideal edge (non nested) length
-      idealEdgeLength: function( edge ){ return 32; },
-
-      // Divisor to compute edge forces
-      edgeElasticity: function( edge ){ return 32; },
-
-      // Nesting factor (multiplier) to compute ideal edge length for nested edges
-      nestingFactor: 1.2,
-
-      // Gravity force (constant)
-      gravity: 1,
-
-      // Maximum number of iterations to perform
-      numIter: 1000,
-
-      // Initial temperature (maximum node displacement)
-      initialTemp: 1000,
-
-      // Cooling factor (how the temperature is reduced between consecutive iterations
-      coolingFactor: 0.99,
-
-      // Lower temperature threshold (below this point the layout will end)
-      minTemp: 1.0
-    }
-  },
-  graph_el_id = 'cy'
-
-  addLayoutSelector(layouts)
-  addDatasetSelector()
-
-  function loadDataset(datasets) {
-    if (datasets.length < 1) {
-      return
-    }
-    // datasets is an array of edge type names
-    d3.json('djornl_dataset.json')
-    .then(all_file_data =>  {
-      // keys are assocs, genes, pheno
-      let data = {
-        nodes: {},
-        edges: {},
-        node_data: {},
-        genes: {},
-      }
-
-      all_file_data['assocs'].forEach(d => {
-        if ( datasets.indexOf(d.type) !== -1) {
-          data.edges[d.id] = {
-            id: d.id,
-            source: d.from,
-            target: d.to,
-            type: d.type,
-            score: d.score,
-          }
-          const node_list = ['from', 'to']
-          node_list.forEach( n => {
-            data.nodes[d[n]] ? data.nodes[d[n]]++ : data.nodes[d[n]] = 1
-          })
-        }
-      })
-
-      // pheno and gene data
-      const data_types = ['genes', 'phenotypes']
-      data_types.forEach( type => {
-        all_file_data[ type ].forEach( d => {
-          if (data.nodes[d.id]) {
-            data.node_data[d.id] = d
-          }
-        })
-      })
-
-      // ensure that all nodes are present in node_data
-      Object.keys(data.nodes).forEach( n => {
-        if (! data.node_data[n]) {
-          console.log('no node data for ' + n)
-        }
-      })
-      window.data = data
-
-      data.node_arr = Object.keys(data.nodes).map(el => {
-        return { data: { id: el } }
-      } )
-      data.edge_arr = Object.keys(data.edges).map(el => { return { data: data.edges[el] } } )
-
-      console.log('Found ' + data.node_arr.length + ' nodes and ' + data.edge_arr.length + ' edges')
-      const cy = renderGraph('cy', data.node_arr, data.edge_arr)
-      window.cy = cy
-
-      let nMin = 999999, nMax = 0
-      cy.nodes().forEach( n => {
-        let node_id = n.id()
-        data.node_data[ n.id() ]['degree'] = n.degree()
-        if (data.node_data[ n.id() ].node_type === 'pheno') {
-          n.addClass('phenotype')
-        }
-        if (n.degree() > nMax) {
-          nMax = n.degree()
-        }
-        if (n.degree() < nMin) {
-          nMin = n.degree()
-        }
-      })
-      $('#filter_degree--range').attr({
-        min: nMin,
-        max: nMax,
-      })
-
-      let collection = cy.collection()
-      cy.nodes().on('click', function(e){
-        let node = e.target
-        collection = collection.union(node)
-        // display metadata
-        if (node.selected()){
-          console.log(data.node_data[node.id()])
-        }
-      })
-      $('#layout--select').change( () => {
-        const value = $('#layout--select').val()
-        const layout = cy.layout( layouts[value] )
-        layout.run()
-      })
-      $('#layout_reset--button').click( () => { cy.reset() } )
-      $('#layout_fit--button').click( () => { cy.fit() } )
-      $('#select_all--button').click( () => { cy.nodes().forEach( e => e.select() ) } )
-      $('#select_none--button').click( () => { cy.nodes().forEach( e => e.unselect() ) } )
-      $('#select_invert--button').click( () => {
-        cy.nodes().forEach( e => e.selected()
-          ? e.unselect()
-          : e.select()
-        )
-      } )
-      $('#export_json--button').click( () => { console.log(cy.json()) } )
-      $('#select_multi--button').click( () => { cy.selectionType() === 'single'
-        ? cy.selectionType('additive')
-        : cy.selectionType('single')
-      } )
-      $('#select_box--button').click( () => { cy.boxSelectionEnabled( !cy.boxSelectionEnabled() ) } )
-      $('#filter_degree--button').click( () => {
-          const value = $('#filter_degree--range').val()
-          cy.remove(cy.filter( e => e.isNode() && e.degree() > value))
-          let nMin = 999999, nMax = 0
-          cy.nodes().forEach( n => {
-            let d = n.degree()
-            if (d > nMax) {
-              nMax = d
-            }
-            if (d < nMin) {
-              nMin = d
-            }
-          })
-          // reset the slider values
-          $('#filter_degree--range').attr({
-            min: nMin,
-            max: nMax,
-          })
-        })
-    })
-  }
-
-  function addDatasetSelector() {
-    $('#dataset--button').click( () => {
-      const datasets = $('input[name=dataset]:checked').map( (i,e) => { return e.value }).get()
-      loadDataset(datasets)
-    })
-  }
-
-  function addLayoutSelector(layouts) {
-    // insert an options element with each of the layouts above
-    const layout_arr = Object.keys(layouts).map( (layout,i) => {
-      return '<option value="' + layout + '"'
-        + ( i ? '' : ' selected' )
-        + '>' + layout + '</option>'
-    }),
-    select_str = '<select id="layout--select" class="form-control" name="layout">' + layout_arr.join('\n') + '</select>'
-    $('#layout--div').append(select_str)
-  }
-
-</script>
+              [% item.label %]
+              </label>
+              [% END %]
+            </div>
+          [% END %]
+          </div>
+          <h2>Node Bag</h2>
+          <div class="form-group">
+            <button id="collection_add--button" class="btn" type="button"
+              data-action="collectSelectedGraphNodes"
+              data-target="cy">
+              Add selected nodes
+            </button>
+            <button id="collection_remove--button" class="btn" type="button"
+              data-action="discardSelectedGraphNodes"
+              data-target="cy">
+              Remove selected nodes
+            </button>
+          </div>
+          <!-- h2>Export</h2>
+          <div class="form-group">
+            <button id="export_json--button" class="btn">
+              Export graph as JSON
+            </button>
+          </div -->
+        </div>
+      </div>
+    </div>
+    <!-- Modal
+    <div class="modal fade" id="collectionModal" tabindex="-1" role="dialog" aria-labelledby="collectionModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h3 class="modal-title" id="collectionModalLabel">Collected Nodes</h3>
+          </div>
+          <div class="modal-body">
+            <table id="table_collection" class="dataTable__table table table-striped table-bordered"></table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div> -->
 [%
-    END; # end wrapper
+    END;
+
+    WRAPPER js_wrapper;
+
+    USE JSON;
+%]
+    const datasetConfig = [% template_data.json %]
+    initKbCytoscape()
+[%
+    END; # end js_wrapper
+  END; # end page wrapper
+
 %]

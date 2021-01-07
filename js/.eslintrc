@@ -1,0 +1,43 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 8,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "impliedStrict": true
+        }
+    },
+    "env": {
+        "browser": true,
+        "mocha": true,
+        "es6": true,
+        "jquery": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "prettier",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:prettier/recommended"
+    ],
+    "rules": {
+        "prettier/prettier": "error",
+        // "comma-dangle": [2, "never"],
+        "func-names": 0,
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+        // "indent": [2, 2, {"VariableDeclarator": 0}],
+        // "max-len": [1, 140],
+        "no-bitwise": 0,
+        "no-console": 1,
+        "no-mixed-operators": 1,
+        "no-param-reassign": 1,
+        "no-plusplus": 0,
+        "no-underscore-dangle": 0,
+        "no-use-before-define": 1
+        // "one-var": "consecutive"
+        // "object-curly-spacing": [1, "always"],
+        // "prefer-rest-params": 0
+        // "spaced-comment": 0,
+        // "space-before-function-paren": [1, "always"],
+        // "semi": 0,
+    }
+  }

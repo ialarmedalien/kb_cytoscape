@@ -1,2 +1,7 @@
 test_local
 sdk.cfg
+*.old
+node_modules/
+cytoscape.js-popper/
+data/
+exascale_data/

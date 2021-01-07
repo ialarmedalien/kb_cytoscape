@@ -1,0 +1,8 @@
+---
+module-description: Something we came up with on the spur of the moment
+module-name: yet_another_kbase_module
+module-version: 6.6.6
+owners:
+- Tintin <tintin@herge.org>
+- Snowy <snowy@herge.org>
+service-language: whitespace
