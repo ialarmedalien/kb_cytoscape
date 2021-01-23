@@ -9,8 +9,6 @@ icon: icon.png
 name: Run KB Cytoscape
 parameters:
   cluster_ids:
-    long-hint: Fetch all nodes that are members of the specified cluster(s), and the
-      edges and nodes within the specified distance (number of hops) of those nodes.
     short-hint: Fetch nodes by cluster ID, in the form "clustering_system_name:cluster_id".
       Enter each ID on a new line.
     ui-name: Cluster IDs
@@ -24,20 +22,13 @@ parameters:
     short-hint: Edge types to filter on
     ui-name: Edge Types
   gene_keys:
-    long-hint: Fetch a gene or list of genes by key, and the edges and nodes within
-      the specified distance (number of hops) of those genes.
     short-hint: Fetch a gene or list of genes by ID. Enter each ID on a new line.
     ui-name: Gene Keys
   phenotype_keys:
-    long-hint: Fetch a phenotype or list of phenotypes by key, and the edges and nodes
-      within the specified distance (number of hops) of those phenotype nodes.
     short-hint: Fetch a phenotype or list of phenotypes by ID. Enter each ID on a
       new line.
     ui-name: Phenotype Keys
   search_text:
-    long-hint: Search for nodes using a simple fuzzy search on node metadata; return
-      the matching nodes, and the edges and nodes within the specified distance (number
-      of hops) of those nodes.
     short-hint: Search nodes and their metadata for the search string
     ui-name: Search text
 screenshots: []

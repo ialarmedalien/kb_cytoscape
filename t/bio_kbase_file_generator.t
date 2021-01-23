@@ -91,98 +91,128 @@ my $expected_data = {
         }
       }
     }],
-    # 'method-suggestions' => [],
-    stored_queries    => {
-      cluster_ids   => {
-        spec => {
-          'id'               => 'cluster_ids',
-          'advanced'         => \0,
-          'allow_multiple'   => \0,
-          'field_type'       => 'textarea',
-          'optional'         => \1,
-          'textarea_options' => { 'n_rows' => 4 }
-        },
-        display => {
-          'ui-name'     => 'Cluster IDs',
-          'short-hint'  => 'Fetch nodes by cluster ID, in the form "clustering_system_name:cluster_id". Enter each ID on a new line.',
-          'long-hint'   => 'Fetch all nodes that are members of the specified cluster(s), and the edges and nodes within the specified distance (number of hops) of those nodes.',
-        },
-        type => 'list<string>',
+};
+
+my $stored_queries_spec = {
+    cluster_ids   => {
+      spec => {
+        'id'               => 'cluster_ids',
+        'advanced'         => \0,
+        'allow_multiple'   => \0,
+        'field_type'       => 'textarea',
+        'optional'         => \1,
+        'textarea_options' => { 'n_rows' => 4 }
       },
-      distance => {
-        spec => {
-          'id'             => 'distance',
-          'advanced'       => \0,
-          'allow_multiple' => \0,
-          'field_type'     => 'text',
-          'optional'       => \1,
-          'text_options'   => {
-            'max_int'      => 100,
-            'min_int'      => 0,
-            'validate_as'  => 'int'
-          },
-        },
-        display => {
-          'ui-name'     => 'Traversal Distance',
-          'short-hint'  => 'Number of hops to find neighbors and neighbors-of-neighbors',
-        },
-        type => 'integer',
+      display => {
+        'ui-name'     => 'Cluster IDs',
+        'short-hint'  => 'Fetch nodes by cluster ID, in the form "clustering_system_name:cluster_id". Enter each ID on a new line.',
+        # 'long-hint'   => 'Fetch all nodes that are members of the specified cluster(s), and the edges and nodes within the specified distance (number of hops) of those nodes.',
       },
-      edge_types => {
-        spec  => {
-          'id'               => 'edge_types',
-          'advanced'         => \0,
-          'allow_multiple'   => \1,
-          'dropdown_options' => {
-            'multiselection' => \1,
-            'options' => [ {
-              'display' => 'AraGWAS phenotype associations',
-              'value'   => 'phenotype-association_AraGWAS'
-            },
-            {
-              'display' => 'AraNetv2 pairwise gene coexpression',
-              'value'   => 'pairwise-gene-coexpression_AraNet_v2'
-            },
-            {
-              'display' => 'AraNetv2 domain co-occurrence',
-              'value'   => 'domain-co-occurrence_AraNet_v2'
-            },
-            {
-              'display' =>
-                  'AraNetv2 high-throughput protein-protein interaction',
-              'value' => 'protein-protein-interaction_high-throughput_AraNet_v2'
-            },
-            {
-              'display' =>
-                  'AraNetv2 literature-curated protein-protein interaction',
-              'value' => 'protein-protein-interaction_literature-curation_AraNet_v2'
-            } ]
-          },
-          'field_type' => 'dropdown',
-          'optional'   => \1,
-        },
-        display => {
-          'ui-name'     => 'Edge Types',
-          'short-hint'  => 'Edge types to filter on',
-        },
-        type => 'list<string>',
-      },
-      search_text => {
-        spec => {
-          'id'             => 'search_text',
-          'advanced'       => \0,
-          'allow_multiple' => \0,
-          'field_type'     => 'text',
-          'optional'       => \1,
-        },
-        display => {
-          'ui-name'     => 'Search text',
-          'short-hint'  => 'Search nodes and their metadata for the search string',
-          'long-hint'   => 'Search for nodes using a simple fuzzy search on node metadata; return the matching nodes, and the edges and nodes within the specified distance (number of hops) of those nodes.',
-        },
-        type => 'string',
-      }
+      type => 'list<string>',
     },
+    distance => {
+      spec => {
+        'id'             => 'distance',
+        'advanced'       => \0,
+        'allow_multiple' => \0,
+        'field_type'     => 'text',
+        'optional'       => \1,
+        'text_options'   => {
+          'max_int'      => 100,
+          'min_int'      => 0,
+          'validate_as'  => 'int'
+        },
+      },
+      display => {
+        'ui-name'     => 'Traversal Distance',
+        'short-hint'  => 'Number of hops to find neighbors and neighbors-of-neighbors',
+      },
+      type => 'integer',
+    },
+    edge_types => {
+      spec  => {
+        'id'               => 'edge_types',
+        'advanced'         => \0,
+        'allow_multiple'   => \1,
+        'dropdown_options' => {
+          'multiselection' => \1,
+          'options' => [ {
+            'display' => 'AraGWAS phenotype associations',
+            'value'   => 'phenotype-association_AraGWAS'
+          },
+          {
+            'display' => 'AraNetv2 pairwise gene coexpression',
+            'value'   => 'pairwise-gene-coexpression_AraNet_v2'
+          },
+          {
+            'display' => 'AraNetv2 domain co-occurrence',
+            'value'   => 'domain-co-occurrence_AraNet_v2'
+          },
+          {
+            'display' =>
+                'AraNetv2 high-throughput protein-protein interaction',
+            'value' => 'protein-protein-interaction_high-throughput_AraNet_v2'
+          },
+          {
+            'display' =>
+                'AraNetv2 literature-curated protein-protein interaction',
+            'value' => 'protein-protein-interaction_literature-curation_AraNet_v2'
+          } ]
+        },
+        'field_type' => 'dropdown',
+        'optional'   => \1,
+      },
+      display => {
+        'ui-name'     => 'Edge Types',
+        'short-hint'  => 'Edge types to filter on',
+      },
+      type => 'list<string>',
+    },
+    search_text => {
+      spec => {
+        'id'             => 'search_text',
+        'advanced'       => \0,
+        'allow_multiple' => \0,
+        'field_type'     => 'text',
+        'optional'       => \1,
+      },
+      display => {
+        'ui-name'     => 'Search text',
+        'short-hint'  => 'Search nodes and their metadata for the search string',
+        # 'long-hint'   => 'Search for nodes using a simple fuzzy search on node metadata; return the matching nodes, and the edges and nodes within the specified distance (number of hops) of those nodes.',
+      },
+      type => 'string',
+    }
+};
+
+# add the stored queries to the expected data structure
+$expected_data->{ stored_queries } = { param => $stored_queries_spec };
+
+$expected_data->{ stored_queries }{ by_query } = {
+    djornl_search_nodes => {
+        id          => 'djornl_search_nodes',
+        name        => 'djornl_search_nodes',
+        description => 'Search for nodes using a simple fuzzy search on node metadata; return the matching nodes, and the edges and nodes within the specified distance (number of hops) of those nodes.',
+        params      => {
+            map { $_ => $expected_data->{ stored_queries }{ param }{ $_ } } qw ( distance edge_types search_text )
+        },
+    },
+    djornl_fetch_all      => {
+        id          => 'djornl_fetch_all',
+        name        => 'djornl_fetch_all',
+        description => 'Fetch all node and edge data, optionally filtering on edge type.',
+        params      => {
+            map { $_ => $expected_data->{ stored_queries }{ param }{ $_ } } qw ( edge_types )
+        }
+    },
+    djornl_fetch_clusters => {
+        id          => 'djornl_fetch_clusters',
+        name        => 'djornl_fetch_clusters',
+        description => 'Fetch all nodes that are members of the specified cluster(s), and the edges and nodes within the specified distance (number of hops) of those nodes.',
+        params      => {
+            map { $_ => $expected_data->{ stored_queries }{ param }{ $_ } } qw ( cluster_ids distance edge_types )
+        },
+    }
 };
 
 subtest 'switch_old_new_files' => sub {
@@ -230,7 +260,7 @@ subtest 'switch_old_new_files' => sub {
 subtest 'amass data' => sub {
 
     Bio::KBase::Config->_clear_instance();
-    local $ENV{ KB_DEPLOYMENT_CONFIG } = path( $data_dir, 'test-metadata-read.cfg' )->canonpath;
+    local $ENV{ KB_DEPLOYMENT_CONFIG } = path( $data_dir, 'config', 'test-metadata-read.cfg' )->canonpath;
 
     my $file_generator  = Bio::KBase::FileGenerator->new;
 
@@ -245,21 +275,22 @@ subtest 'amass data' => sub {
         or diag explain $metadata;
 
     my $stored_queries  = $file_generator->get_stored_queries;
-    for my $param ( keys %$stored_queries ) {
+    for my $param ( keys %{ $stored_queries->{ param } } ) {
         cmp_deeply
-            $stored_queries->{ $param },
-            $expected_data->{ stored_queries }{ $param },
+            $stored_queries->{ param }{ $param },
+            $expected_data->{ stored_queries }{ param }{ $param },
             'stored query data for ' . $param . ' matches'
         or diag explain {
-            got     => $stored_queries->{ $param },
-            expect  => $expected_data->{ stored_queries }{ $param },
+            got     => $stored_queries->{ param }{ $param },
+            expect  => $expected_data->{ stored_queries }{ param }{ $param },
         };
     }
 
     cmp_deeply
         $stored_queries,
         $expected_data->{ stored_queries },
-        'read stored queries correctly';
+        'read stored queries correctly'
+        or diag explain $stored_queries;
 
     # recreate the file generator and do the whole data gathering routine
     $file_generator  = Bio::KBase::FileGenerator->new;
@@ -272,10 +303,49 @@ subtest 'amass data' => sub {
 
 };
 
+subtest '_generate_param_group' => sub {
+
+    Bio::KBase::Config->_clear_instance();
+    local $ENV{ KB_DEPLOYMENT_CONFIG } = path( $data_dir, 'config', 'test-metadata-read.cfg' )->canonpath;
+    my $file_generator = Bio::KBase::FileGenerator->new;
+
+    my $stored_queries = $file_generator->get_stored_queries;
+    my $grouper   = $file_generator->_generate_param_group(
+        $stored_queries->{ by_query }{ djornl_search_nodes }
+    );
+
+    my $expected = {
+        id              => 'djornl_search_nodes',
+        # stored query name
+        ui_name         => 'djornl_search_nodes',
+        # stored query description
+        description     => 'Search for nodes using a simple fuzzy search on node metadata; return the matching nodes, and the edges and nodes within the specified distance (number of hops) of those nodes.',
+        # the permissible params for the query
+        parameter_ids   => [
+            qw(
+                djornl_search_nodes____distance
+                djornl_search_nodes____edge_types
+                djornl_search_nodes____search_text
+            )
+        ],
+        optional        => 1,
+        advanced        => 1,
+        with_border     => 1,
+    };
+
+    cmp_deeply $grouper,
+        $expected,
+        'parameter grouper is as expected'
+        or diag explain {
+            got     => $grouper,
+            expect  => $expected,
+        };
+};
+
 subtest 'generate_files' => sub {
 
     Bio::KBase::Config->_clear_instance();
-    local $ENV{ KB_DEPLOYMENT_CONFIG } = path( $data_dir, 'test-metadata-read.cfg' )->canonpath;
+    local $ENV{ KB_DEPLOYMENT_CONFIG } = path( $data_dir, 'config', 'test-metadata-read.cfg' )->canonpath;
     my $file_generator = Bio::KBase::FileGenerator->new;
     my $app_dir         = $file_generator->config->app_dir;
 

@@ -3,11 +3,13 @@ package Bio::KBase::Config;
 use strict;
 use warnings;
 use feature qw( say );
+use Data::Dumper::Concise;
+
 use Moo;
 with 'MooX::Singleton';
-
 use Config::Any;
 use Path::Tiny;
+use Try::Tiny;
 use JSON::Validator;
 
 has config_file => (
@@ -37,6 +39,12 @@ has callback_url => (
 sub _build_callback_url {
     $ENV{ SDK_CALLBACK_URL } or die 'SDK_CALLBACK_URL env var not set';
 }
+
+# which dataset to query in the Relation Engine repo
+has dataset => (
+    is      => 'ro',
+    required => 1,
+);
 
 has docker_re_api_endpoint => (
     is      => 'ro',
@@ -69,15 +77,6 @@ sub _build_re_collections_paths {
     shift->_get_spec_files( "collections" );
 }
 
-has re_datasets_paths => (
-    is      => 'lazy',
-    builder => 1,
-);
-
-sub _build_re_datasets_paths {
-    shift->_get_spec_files( "datasets" );
-}
-
 has re_stored_queries_paths => (
     is      => 'lazy',
     builder => 1,
@@ -107,9 +106,15 @@ sub _build_re_stored_query_params_by_query {
 # return a hashref of file basename to file path for all JSON and YAML files in a directory
 sub _get_spec_files {
     my ( $self, $spec_type ) = @_;
-    # any file in this dir ending in .yaml or .json
-    my @file_list = path( $self->re_spec_base_dir, $spec_type, "djornl" )->children( qr/\.(yaml|json)\z/ );
-    return { map { path( $_ )->basename( qr/\.(yaml|json)\z/ ) => $_->stringify } @file_list };
+
+    try {
+        # any file in this dir ending in .yaml or .json
+        my @file_list = path( $self->re_spec_base_dir, $spec_type, $self->dataset )->children( qr/\.(yaml|json)\z/ );
+        return { map { path( $_ )->basename( qr/\.(yaml|json)\z/ ) => $_->stringify } @file_list };
+    }
+    catch {
+        die "Cannot retrieve " . $self->dataset . " $spec_type specs: $_";
+    };
 }
 
 has scratch => (
@@ -174,6 +179,7 @@ sub BUILDARGS {
         docker-re-api-endpoint
         re-api-endpoint
         re-spec-base-dir
+        dataset
         scratch
         workspace-url
     );

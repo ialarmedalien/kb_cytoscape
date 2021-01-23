@@ -36,7 +36,7 @@ methods:
             short-hint: Perform a dry run by parsing params but not fetching data
           spec:
             id: dry_run
-            advanced: false
+            advanced: true
             default_values: [0]
             field_type: dropdown
             optional: false

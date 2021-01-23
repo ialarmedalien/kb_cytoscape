@@ -15,6 +15,7 @@ require_ok "Bio::KBase::RelationEngine::Client";
 unless ( $ENV{ DOCKER_COMPOSE_ENV } ) {
     say 'Skipping RelationEngine::Client tests: not in docker-compose set up';
     done_testing;
+    exit 0;
 }
 
 # get the current test/data directory path
