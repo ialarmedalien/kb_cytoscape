@@ -15,8 +15,8 @@ module [% template_data.module_name %] {
         END;
     END;
 %]
-[%  FOR param IN template_data.stored_queries.keys.sort;
-        query_data = template_data.stored_queries.$param;
+[%  FOR param IN template_data.stored_queries.param.keys.sort;
+        query_data = template_data.stored_queries.param.$param;
         type = query_data.type;
         IF type == 'integer';
           type = 'int';

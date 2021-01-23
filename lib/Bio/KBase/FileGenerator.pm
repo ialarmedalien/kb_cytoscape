@@ -97,6 +97,11 @@ sub _build_metadata_yaml_path {
     path( shift->config->app_dir, 'metadata.yaml' );
 }
 
+has param_join_str => (
+    is      => 'ro',
+    default => '____',
+);
+
 =head2 display_yaml_path
 
 Given a method name, generate the path for the display.yaml file.
@@ -210,29 +215,31 @@ sub get_stored_queries {
     my $jv = $self->validator;
     my $sq_data;
 
-    my $common_params = {
-        distance    => 1,
-        edge_types  => 1,
-    };
-
     for my $sq ( keys %{ $self->config->re_stored_queries_paths } ) {
         # set the schema
         $jv->schema( $self->config->re_stored_queries_paths->{ $sq } );
+
+        $sq_data->{ by_query }{ $sq }{ id } = $sq;
+        for ( qw( name title description ) ) {
+            $sq_data->{ by_query }{ $sq }{ $_ } = $jv->get( '/' . $_ )
+                if $jv->get( '/' . $_ );
+        }
+
         for my $param ( keys %{ $jv->get( '/params/properties' ) } ) {
-            # this is not a unique parameter
-            if ( $sq_data->{ $param } ) {
-                delete $sq_data->{ $param }{ display }{ 'long-hint' };
+            # we have already seen this param
+            if ( $sq_data->{ param }{ $param } ) {
+                # delete $sq_data->{ param }{ $param }{ display }{ 'long-hint' };
+                $sq_data->{ by_query }{ $sq }{ params }{ $param } = $sq_data->{ param }{ $param };
                 next;
             }
 
-            $sq_data->{ $param }{ spec } = $self->extract_spec_data(
+            $sq_data->{ param }{ $param }{ spec } = $self->extract_spec_data(
                 $jv, $param, '/params/properties/' . $param
             );
 
-            $sq_data->{ $param }{ display } = {
+            $sq_data->{ param }{ $param }{ display } = {
                 'ui-name'     => $jv->get( '/params/properties/' . $param . '/title' ),
                 'short-hint'  => $jv->get( '/params/properties/' . $param . '/description' ),
-                'long-hint'   => $jv->get( '/description' ),
             };
 
             my $type = $jv->get( '/params/properties/' . $param . '/type' );
@@ -240,20 +247,33 @@ sub get_stored_queries {
                 my $item_type = $jv->get( '/params/properties/' . $param . '/items/type' ) || 'string';
                 $type = 'list<' . $item_type . '>';
             }
-            $sq_data->{ $param }{ type } = $type;
+            $sq_data->{ param }{ $param }{ type } = $type;
 
             # $sq_data->{ $param }{ bundle } = $jv->bundle( {
             #     schema => $jv->get( '/params/properties/' . $param )
             # } );
 
-            if ( $sq_data->{ $param }{ spec }{ field_type } eq 'textarea' ) {
-                $sq_data->{ $param }{ display }{ 'short-hint' } .= ". Enter each ID on a new line.";
+            if ( $sq_data->{ param }{ $param }{ spec }{ field_type } eq 'textarea' ) {
+                $sq_data->{ param }{ $param }{ display }{ 'short-hint' } .= ". Enter each ID on a new line.";
             }
+            $sq_data->{ by_query }{ $sq }{ params }{ $param } = $sq_data->{ param }{ $param };
         }
+        my $grouper = $self->_generate_param_group( $sq_data->{ by_query }{ $sq } );
+
     }
 
     return $sq_data;
 }
+
+=head2 extract_spec_data
+
+Given the JSON schema for a parameter, generate the spec.json data structure
+
+@param {object} $schema
+@param {string} $param
+@param {prefix} $prefix
+
+=cut
 
 sub extract_spec_data {
     my ( $self, $schema, $param, $prefix ) = @_;
@@ -278,6 +298,7 @@ sub extract_spec_data {
         field_type      => $input_type,
     };
 
+    # set the min / max if the schema specifies them
     if ( $type eq 'integer' ) {
         $spec->{ text_options } = { validate_as => 'int' };
         $spec->{ text_options }{ min_int } = $schema->get( $prefix . '/minimum' )
@@ -288,14 +309,18 @@ sub extract_spec_data {
 
     if ( $input_type eq 'dropdown' ) {
         $spec->{ dropdown_options } = {
+            # set up the label and value for each dropdown option
             options => [ map {
                 { display => $_->{ title }, value => $_->{ const } }
             } @{ $schema->get( $prefix . '/items/oneOf' ) } ],
+            # this param should allow multiple selection, but the narrative UI
+            # does not have an implementation for it yet
             multiselection => \1,
         };
         $spec->{ allow_multiple } = \1;
     }
 
+    # default to 4 rows for textareas
     if ( $input_type eq 'textarea' ) {
         $spec->{ textarea_options } = { n_rows => 4 };
     }
@@ -410,8 +435,8 @@ sub generate_display_yaml {
             %$metadata_params,
             # data from the stored queries
             map {
-                $_ => $data->{ stored_queries }{ $_ }{ display }
-            } keys %{ $data->{ stored_queries } }
+                $_ => $data->{ stored_queries }{ param }{ $_ }{ display }
+            } keys %{ $data->{ stored_queries }{ param } }
         },
 
         # related methods
@@ -491,8 +516,8 @@ sub generate_spec_json {
         }
     }
 
-    for ( keys %{ $data->{ stored_queries } } ) {
-        push @$params, $data->{ stored_queries }{ $_ }{ spec };
+    for ( keys %{ $data->{ stored_queries }{ param } } ) {
+        push @$params, $data->{ stored_queries }{ param }{ $_ }{ spec };
         push @$input_mapping, {
             input_parameter => $_,
             target_property => $_,
@@ -536,6 +561,25 @@ sub generate_spec_json {
     path( $output_file )->spew_utf8( encode_json $spec );
 
     return;
+}
+
+sub _generate_param_group {
+    my ( $self, $stored_query_data ) = @_;
+
+    return {
+        id              => $stored_query_data->{ id },
+        # stored query name
+        ui_name         => $stored_query_data->{ title } || $stored_query_data->{ name },
+        # stored query description
+        description     => $stored_query_data->{ description } || '',
+        # the permissible params for the query
+        parameter_ids   => [map {
+            $stored_query_data->{ id } . $self->param_join_str . $_
+        } sort keys %{ $stored_query_data->{ params } } ],
+        optional        => 1,  # default 0
+        advanced        => 1,  # default 0
+        with_border     => 1,
+    };
 }
 
 1;

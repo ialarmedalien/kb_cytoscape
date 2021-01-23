@@ -217,13 +217,6 @@ sub test_success_response {
         && exists $output->{ query_params } &&  %{ $output->{ query_params } },
         'content and query params are present in output';
 
-    # my $response_data = $output->{ content };
-    # unless ( $response_data->{ results } ) {
-    #     ok exists $response_data->{ results }
-    #         && exists $response_data->{ results }[ 0 ],
-    #         'results key is defined in the response content';
-    #     return;
-    # }
     my $got      = $output->{ results };
     my $expected = $test->{ results } || $test->{ coerce };
 
